@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CBZ Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
 <style>
 :root{
   --bg:#f1f0ee; --panel:#e4e2de; --ink:#1d1c1a; --mute:#6b6862; --line:#cfccc6; --accent:#2f5d8a; --accent-ink:#fff;
@@ -18,60 +21,68 @@
 :root[data-theme="dark"]{--bg:#121214; --panel:#1c1c20; --ink:#e8e6e1; --mute:#8d8a84; --line:#2c2c32; --accent:#7fb0e0; --accent-ink:#0d1620; color-scheme:dark;}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 Georgia,"Iowan Old Style","Palatino Linotype",serif;display:flex;flex-direction:column;overflow:hidden}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Figtree",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;display:flex;flex-direction:column;overflow:hidden}
 button,input{font:inherit;color:inherit}
-header,footer{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;background:var(--panel);flex-wrap:wrap}
-header{border-bottom:1px solid var(--line)}
-footer{border-top:1px solid var(--line);display:none;flex-wrap:nowrap}
+header,footer{display:flex;gap:.5rem;padding:.5rem .75rem;background:var(--panel)}
+header{align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+footer{display:none;flex-direction:column;border-top:1px solid var(--line)}
 body.loaded footer{display:flex}
 body.noui header,body.noui footer{display:none}
-#title{flex:1 1 6rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;color:var(--mute)}
-body.loaded #title{font-style:normal;color:var(--ink)}
+.row{display:flex;align-items:center;gap:.5rem}
+#title{flex:1 1 6rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mute)}
+body.loaded #title{color:var(--ink);font-weight:600}
 .ctl{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
-.btn{background:transparent;border:1px solid var(--line);border-radius:6px;padding:.3rem .65rem;cursor:pointer;min-height:2.1rem;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
+.btn{background:transparent;border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;cursor:pointer;min-height:2.2rem;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;font-weight:500}
 .btn:hover{border-color:var(--mute)}
 .btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.ic{padding:.3rem .55rem;min-width:2.1rem;justify-content:center}
+.btn.ic{padding:.3rem .55rem;min-width:2.2rem;justify-content:center}
 .btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .seg{display:flex}
 .seg .btn{border-radius:0;margin-left:-1px}
-.seg .btn:first-child{border-radius:6px 0 0 6px;margin-left:0}
-.seg .btn:last-child{border-radius:0 6px 6px 0}
+.seg .btn:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.seg .btn:last-child{border-radius:0 8px 8px 0}
 .seg .btn[aria-pressed="true"]{position:relative;z-index:1}
 svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #stage{flex:1;min-height:0;overflow:auto;position:relative;display:flex;align-items:flex-start;scrollbar-gutter:stable;user-select:none;-webkit-user-select:none;--z:1;--sw:800px;--sh:600px}
 #stage.grab{cursor:grabbing}
-#page{display:none;margin:0 auto;flex:none;-webkit-user-drag:none;--ar:.66}
+#spread{display:none;margin:0 auto;flex:none;align-items:center}
+#spread img{display:block;height:auto;-webkit-user-drag:none;--ar:.66}
 #strip{display:none;flex-direction:column;gap:6px;flex:none;min-width:100%;width:max-content}
 .pg{margin:0 auto;flex:none;aspect-ratio:var(--ar,var(--dar,.66));background:color-mix(in srgb,var(--panel) 70%,transparent)}
 .pg img{display:block;width:100%;height:100%;-webkit-user-drag:none}
-body.loaded #stage.page #page{display:block}
+body.loaded #stage.page #spread{display:flex}
 body.loaded #stage.scroll #strip{display:flex}
-#stage.w :is(#page,.pg){width:calc(var(--sw)*var(--z))}
-#stage.h :is(#page,.pg){width:min(calc(var(--sw)*var(--z)),calc(var(--sh)*var(--z)*var(--ar,var(--dar,.66))))}
-#stage.o :is(#page,.pg){width:calc(var(--nw,800px)*var(--z))}
-#stage :is(#page){height:auto}
+#stage.w :is(#spread img,.pg){width:calc(var(--sw)*var(--z)/var(--n,1))}
+#stage.h :is(#spread img,.pg){width:min(calc(var(--sw)*var(--z)/var(--n,1)),calc(var(--sh)*var(--z)*var(--ar,var(--dar,.66))))}
+#stage.o :is(#spread img,.pg){width:calc(var(--nw,800px)*var(--z))}
 #empty{margin:auto;text-align:center;padding:2rem;max-width:28rem}
 body.loaded #empty{display:none}
-#empty h1{font-size:1.6rem;font-weight:normal;margin:0 0 .5rem}
+#empty h1{font-size:1.8rem;font-weight:700;letter-spacing:-.01em;margin:0 0 .5rem}
 #empty p{color:var(--mute);margin:.25rem 0 1.25rem}
 #empty small{display:block;margin-top:1.25rem;color:var(--mute)}
-.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:.6rem 1.2rem}
+.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:.6rem 1.2rem;font-weight:600}
 #msg{min-height:1.2em;margin-top:.75rem;color:var(--mute)}
 #msg.err{color:#c0392b}
-#drop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:color-mix(in srgb,var(--bg) 88%,transparent);border:3px dashed var(--accent);font-size:1.4rem;z-index:10}
+#drop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:color-mix(in srgb,var(--bg) 88%,transparent);border:3px dashed var(--accent);font-size:1.4rem;font-weight:600;z-index:10}
 #drop.on{display:flex}
+#thumbs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;height:5.8rem}
+body.nothumbs #thumbs{display:none}
+.th{flex:none;width:3.7rem;height:100%;padding:0;border:2px solid transparent;border-radius:6px;background:var(--bg) center/contain no-repeat;position:relative;cursor:pointer}
+.th:hover{border-color:var(--mute)}
+.th.cur{border-color:var(--accent)}
+.th span{position:absolute;bottom:2px;right:3px;font-size:.7rem;font-weight:600;background:color-mix(in srgb,var(--bg) 82%,transparent);padding:0 .3rem;border-radius:4px}
 #scrub{flex:1;accent-color:var(--accent);min-width:0}
 .pgl{display:flex;align-items:center;gap:.4rem;white-space:nowrap}
-#pgIn{width:4.2rem;padding:.25rem .4rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;text-align:center}
-#toast{position:fixed;left:50%;bottom:4.5rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.4rem .9rem;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#pgIn{width:4.2rem;padding:.25rem .4rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;text-align:center}
+#toast{position:fixed;left:50%;bottom:5rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.4rem .9rem;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;font-weight:600}
 #toast.on{opacity:.92}
-dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:1.25rem 1.5rem;max-width:30rem;width:92%}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:1.25rem 1.5rem;max-width:32rem;width:92%}
 dialog::backdrop{background:rgba(0,0,0,.5)}
-dialog h2{margin:0 0 .75rem;font-size:1.2rem;font-weight:normal}
+dialog h2{margin:0 0 .75rem;font-size:1.25rem;font-weight:700}
 dialog table{border-collapse:collapse;width:100%;margin-bottom:1rem}
 dialog td{padding:.25rem 0;vertical-align:top}
 dialog td:first-child{padding-right:1rem;white-space:nowrap;color:var(--mute)}
+dialog label{display:flex;gap:.5rem;align-items:center;margin-bottom:1rem}
 kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem;background:var(--bg)}
 @media (max-width:700px){.lbl{display:none}header{gap:.35rem}.pgl .of{display:none}}
 </style>
@@ -82,9 +93,10 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   <span id="title">No comic loaded</span>
   <div class="ctl">
     <div class="seg" role="group" aria-label="Reading mode">
-      <button class="btn" type="button" data-mode="page" title="One page at a time (v)">Page</button>
+      <button class="btn" type="button" data-mode="page" title="One screen at a time (v)">Page</button>
       <button class="btn" type="button" data-mode="scroll" title="Continuous vertical scroll (v)">Scroll</button>
     </div>
+    <button class="btn" type="button" id="two" aria-pressed="false" title="Two-page spreads (d)">2 pages</button>
     <div class="seg" role="group" aria-label="Fit">
       <button class="btn" type="button" data-fit="w" title="Fit width (1)">Width</button>
       <button class="btn" type="button" data-fit="h" title="Fit whole page (2)">Fit</button>
@@ -96,6 +108,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
       <button class="btn ic" type="button" id="zi" title="Zoom in (+)" aria-label="Zoom in">+</button>
     </div>
     <button class="btn" type="button" id="dir" aria-pressed="false" title="Right-to-left reading (r)">Manga</button>
+    <button class="btn" type="button" id="thumbBtn" aria-pressed="true" title="Page previews (t)">Previews</button>
     <button class="btn ic" type="button" id="theme" title="Theme: auto" aria-label="Change theme">◐</button>
     <button class="btn ic" type="button" id="fs" title="Fullscreen (f)" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="btn ic" type="button" id="helpBtn" title="Help and shortcuts (?)" aria-label="Help">?</button>
@@ -111,15 +124,18 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     <div id="msg" role="status"></div>
     <small>Press <kbd>?</kbd> any time for controls.</small>
   </div>
-  <img id="page" alt="" draggable="false">
+  <div id="spread"><img id="page" alt="" draggable="false"><img id="page2" alt="" draggable="false" style="display:none"></div>
   <div id="strip"></div>
 </main>
 
 <footer>
-  <button class="btn ic" type="button" id="left" aria-label="Previous page">‹</button>
-  <input id="scrub" type="range" min="1" max="1" value="1" aria-label="Page slider">
-  <label class="pgl">Page <input id="pgIn" type="number" min="1" value="1"> <span class="of">of</span> <span id="tot">0</span></label>
-  <button class="btn ic" type="button" id="right" aria-label="Next page">›</button>
+  <div id="thumbs" aria-label="Page previews"></div>
+  <div class="row">
+    <button class="btn ic" type="button" id="left" aria-label="Previous page">‹</button>
+    <input id="scrub" type="range" min="1" max="1" value="1" aria-label="Page slider">
+    <label class="pgl">Page <input id="pgIn" type="number" min="1" value="1"> <span class="of">of</span> <span id="tot">0</span></label>
+    <button class="btn ic" type="button" id="right" aria-label="Next page">›</button>
+  </div>
 </footer>
 
 <div id="drop">Drop your .cbz file to open it</div>
@@ -135,13 +151,16 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     <tr><td><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></td><td>Zoom in / out / reset</td></tr>
     <tr><td><kbd>Ctrl</kbd> + wheel</td><td>Zoom toward the cursor (also trackpad pinch)</td></tr>
     <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Fit width / fit page / actual size</td></tr>
+    <tr><td><kbd>d</kbd></td><td>Two-page spreads on or off</td></tr>
     <tr><td><kbd>v</kbd></td><td>Switch between Page and Scroll modes</td></tr>
+    <tr><td><kbd>t</kbd></td><td>Show or hide page previews</td></tr>
     <tr><td><kbd>r</kbd></td><td>Right-to-left (manga) mode</td></tr>
     <tr><td><kbd>h</kbd></td><td>Hide or show the toolbars</td></tr>
     <tr><td><kbd>g</kbd></td><td>Jump to a page number</td></tr>
     <tr><td><kbd>f</kbd></td><td>Fullscreen</td></tr>
   </table>
-  <p style="color:var(--mute);margin:0 0 1rem">In Page mode, click the left or right edge of the page to turn it, and the middle to hide the toolbars. Drag a zoomed page to move around it.</p>
+  <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
+  <p style="color:var(--mute);margin:0 0 1rem">In Page mode, click the left or right edge to turn the page and the middle to hide the toolbars. Drag a zoomed page to move around it. Wide pages are always shown on their own.</p>
   <button class="btn primary" type="button" id="helpClose">Got it</button>
 </dialog>
 
@@ -149,19 +168,18 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
-  var stage=$("stage"), img=$("page"), strip=$("strip"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
-  var zip=null, names=[], idx=0, key="", cache={}, token=0, loaded=false;
-  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1};
+  var stage=$("stage"), img=$("page"), img2=$("page2"), strip=$("strip"), thumbs=$("thumbs"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
+  var zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
+  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700};
   var MIME={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",avif:"image/avif",bmp:"image/bmp"};
 
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
-  try{ var saved=JSON.parse(ls("cbz:settings")); if(saved){ for(var k in S){ if(saved[k]!==undefined) S[k]=saved[k]; } } }catch(e){}
+  try{ var sv=JSON.parse(ls("cbz:settings")); if(sv){ for(var k in S){ if(sv[k]!==undefined) S[k]=sv[k]; } } }catch(e){}
   function persist(){ ls("cbz:settings",JSON.stringify(S)); }
   function extOf(n){ var m=/\.([a-z0-9]+)$/i.exec(n); return m?m[1].toLowerCase():""; }
-
   var tt; function toast(t){ var el=$("toast"); el.textContent=t; el.classList.add("on"); clearTimeout(tt); tt=setTimeout(function(){el.classList.remove("on")},1600); }
 
-  /* ---------- layout and settings ---------- */
+  /* ---------- settings and layout ---------- */
   function apply(){
     stage.classList.remove("w","h","o","page","scroll"); stage.classList.add(S.fit,S.mode);
     stage.style.setProperty("--z",S.z);
@@ -169,6 +187,11 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     document.querySelectorAll("[data-mode]").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.mode===S.mode); });
     $("zr").textContent=Math.round(S.z*100)+"%";
     $("dir").setAttribute("aria-pressed",S.rtl);
+    $("two").setAttribute("aria-pressed",S.two);
+    $("thumbBtn").setAttribute("aria-pressed",S.thumbs);
+    $("cover").checked=S.cover;
+    document.body.classList.toggle("nothumbs",!S.thumbs);
+    $("spread").style.flexDirection=S.rtl?"row-reverse":"row";
     scrub.style.direction=S.rtl?"rtl":"ltr";
     $("left").setAttribute("aria-label",S.rtl?"Next page":"Previous page");
     $("right").setAttribute("aria-label",S.rtl?"Previous page":"Next page");
@@ -188,10 +211,12 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   }
   function setFit(f){ S.fit=f; S.z=1; apply(); persist(); if(loaded){ stage.scrollTo(0,S.mode==="scroll"?stage.scrollTop:0); refresh(); } toast({w:"Fit width",h:"Fit whole page",o:"Actual size"}[f]); }
   function setRtl(v){ S.rtl=v; apply(); persist(); toast(v?"Right-to-left on":"Right-to-left off"); }
+  function setTwo(v){ S.two=v; apply(); persist(); if(loaded&&S.mode==="page") goTo(idx); toast(v?"Two-page spreads on":"Two-page spreads off"); }
+  function setThumbs(v){ S.thumbs=v; apply(); persist(); if(v) updateNav(); }
   function setMode(m){
     S.mode=m; apply(); persist();
-    if(loaded){ if(m==="scroll"){ buildStrip(); goTo(idx); } else show(idx); }
-    toast(m==="scroll"?"Continuous scroll":"One page at a time");
+    if(loaded){ if(m==="scroll"){ shown=[]; buildStrip(); goTo(idx); } else goTo(idx); }
+    toast(m==="scroll"?"Continuous scroll":"One screen at a time");
   }
   function toggleUi(){ document.body.classList.toggle("noui"); if(document.body.classList.contains("noui")) toast("Click the middle of the page to show toolbars"); }
 
@@ -205,7 +230,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
       });
       list.sort(function(a,b){ return a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}); });
       if(!list.length) throw new Error("empty");
-      zip=z; names=list; cache={}; token++; loaded=true;
+      zip=z; names=list; cache={}; dc={}; shown=[]; token++; loaded=true;
       key="cbz:"+file.name+":"+file.size;
       var p=parseInt(ls(key),10); idx=p>=0&&p<names.length?p:0;
       $("title").textContent=file.name.replace(/\.(cbz|zip)$/i,"");
@@ -213,7 +238,9 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
       scrub.max=names.length; pgIn.max=names.length; $("tot").textContent=names.length;
       document.body.classList.add("loaded"); msg.textContent="";
       strip.innerHTML=""; strip.style.removeProperty("--dar");
-      if(S.mode==="scroll"){ buildStrip(); goTo(idx); } else show(idx);
+      buildThumbs();
+      if(S.mode==="scroll") buildStrip();
+      goTo(idx);
     }catch(e){
       msg.className="err";
       msg.textContent=e&&e.message==="empty"?"No images were found in that file.":"That file couldn’t be opened. CBZ files are ZIP archives; CBR (RAR) files aren’t supported.";
@@ -224,29 +251,52 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     if(cache[i]) return cache[i];
     var n=names[i], u="data:"+MIME[extOf(n)]+";base64,"+await zip.file(n).async("base64");
     cache[i]=u;
-    var ks=Object.keys(cache); if(ks.length>8){ ks.sort(function(a,b){return Math.abs(b-i)-Math.abs(a-i)}); delete cache[ks[0]]; }
+    var ks=Object.keys(cache); if(ks.length>10){ ks.sort(function(a,b){return Math.abs(b-i)-Math.abs(a-i)}); delete cache[ks[0]]; }
     return u;
   }
-
-  /* ---------- page mode ---------- */
-  async function show(i,opt){
-    if(!zip) return;
-    idx=Math.max(0,Math.min(names.length-1,i)); updateNav();
-    var my=++token, cur=idx, u=await dataUrl(cur);
-    if(my!==token) return;
-    img.src=u; img.alt="Page "+(cur+1);
-    try{ await img.decode(); }catch(e){}
-    if(my!==token) return;
-    img.style.setProperty("--ar",img.naturalWidth/img.naturalHeight); img.style.setProperty("--nw",img.naturalWidth+"px");
-    stage.scrollLeft=(stage.scrollWidth-stage.clientWidth)/2;
-    stage.scrollTop=opt&&opt.end?stage.scrollHeight:0;
-    if(cur+1<names.length) dataUrl(cur+1).catch(function(){});
-    if(cur>0) dataUrl(cur-1).catch(function(){});
+  async function dim(i){
+    if(dc[i]) return dc[i];
+    var t=new Image(); t.src=await dataUrl(i);
+    try{ await t.decode(); }catch(e){}
+    return dc[i]={w:t.naturalWidth||1,h:t.naturalHeight||1};
   }
+  function wide(d){ return d.w>d.h*1.05; }
+
+  /* ---------- page mode (single and two-page) ---------- */
+  async function show(i,opt){
+    if(!zip) return; opt=opt||{};
+    var n=names.length, my=++token, s=Math.max(0,Math.min(n-1,i)), e=s, back=S.two&&opt.endAt!==undefined;
+    if(S.two){
+      if(back){ e=Math.min(n-1,opt.endAt); s=(e===0||(S.cover&&e<=1))?e:e-1; }
+      else if(!(S.cover&&s===0)&&s+1<n) e=s+1;
+      if(e!==s){
+        var a=await dim(s), b=await dim(e); if(my!==token) return;
+        if(wide(a)||wide(b)){ if(back) s=e; else e=s; }
+      }
+    }
+    var pages=s===e?[s]:[s,e];
+    idx=s; shown=pages; updateNav();
+    var us=await Promise.all(pages.map(dataUrl)), ds=await Promise.all(pages.map(dim));
+    if(my!==token) return;
+    $("spread").style.setProperty("--n",pages.length);
+    [img,img2].forEach(function(im,k){
+      if(k<pages.length){
+        im.src=us[k]; im.alt="Page "+(pages[k]+1);
+        im.style.setProperty("--ar",ds[k].w/ds[k].h); im.style.setProperty("--nw",ds[k].w+"px"); im.style.display="block";
+      }else{ im.removeAttribute("src"); im.style.display="none"; }
+    });
+    try{ await Promise.all([img,img2].slice(0,pages.length).map(function(im){ return im.decode(); })); }catch(x){}
+    if(my!==token) return;
+    stage.scrollLeft=(stage.scrollWidth-stage.clientWidth)/2;
+    stage.scrollTop=opt.bottom?stage.scrollHeight:0;
+    if(e+1<n) dataUrl(e+1).catch(function(){});
+    if(s>0) dataUrl(s-1).catch(function(){});
+  }
+  function align(i){ return S.cover?(i===0?0:i-((i-1)%2)):i-(i%2); }
 
   /* ---------- scroll mode ---------- */
   function buildStrip(){
-    strip.innerHTML="";
+    strip.innerHTML=""; strip.style.removeProperty("--dar");
     names.forEach(function(n,i){
       var d=document.createElement("div"), im=document.createElement("img");
       d.className="pg"; im.alt="Page "+(i+1); im.draggable=false;
@@ -284,22 +334,70 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   }
   stage.addEventListener("scroll",refresh,{passive:true});
 
+  /* ---------- thumbnails ---------- */
+  var tq=[], tbusy=0, tio=null, tgen=0;
+  function buildThumbs(){
+    tgen++; tq=[]; thumbs.innerHTML=""; if(tio) tio.disconnect();
+    tio=new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ tio.unobserve(en.target); tq.push(+en.target.dataset.i); } });
+      pump();
+    },{root:thumbs,rootMargin:"0px 400px"});
+    names.forEach(function(n,i){
+      var d=document.createElement("button");
+      d.className="th"; d.type="button"; d.dataset.i=i; d.setAttribute("aria-label","Go to page "+(i+1));
+      d.innerHTML="<span>"+(i+1)+"</span>"; d.onclick=function(){ goTo(i); d.blur(); };
+      thumbs.appendChild(d); tio.observe(d);
+    });
+  }
+  function pump(){
+    while(tbusy<2&&tq.length){
+      var g=tgen; tbusy++;
+      thumb(tq.shift(),g).then(function(){ tbusy--; pump(); });
+    }
+  }
+  async function thumb(i,g){
+    try{
+      var buf=await zip.file(names[i]).async("arraybuffer");
+      if(g!==tgen) return;
+      var bmp=await createImageBitmap(new Blob([buf],{type:MIME[extOf(names[i])]}));
+      var h=130, w=Math.max(1,Math.round(bmp.width*h/bmp.height)), c=document.createElement("canvas");
+      c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h);
+      if(bmp.close) bmp.close();
+      if(g===tgen&&thumbs.children[i]) thumbs.children[i].style.backgroundImage="url("+c.toDataURL("image/jpeg",.65)+")";
+    }catch(e){}
+  }
+
   /* ---------- navigation ---------- */
   function updateNav(){
     scrub.value=idx+1; pgIn.value=idx+1; ls(key,String(idx));
+    thumbs.querySelectorAll(".cur").forEach(function(t){ t.classList.remove("cur"); });
+    var cur=S.mode==="page"&&shown.length?shown:[idx];
+    cur.forEach(function(i){ if(thumbs.children[i]) thumbs.children[i].classList.add("cur"); });
+    var el=thumbs.children[cur[0]];
+    if(el&&S.thumbs&&el.scrollIntoView) el.scrollIntoView({inline:"center",block:"nearest"});
   }
   function goTo(i,opt){
     if(!loaded) return;
     i=Math.max(0,Math.min(names.length-1,i));
     if(S.mode==="scroll"){ idx=i; updateNav(); stage.scrollTop=strip.children[i].offsetTop; refresh(); }
-    else show(i,opt);
+    else show(S.two?align(i):i,opt);
   }
-  function fwd(){ goTo(idx+1); }
-  function back(){ goTo(idx-1); }
+  function fwd(){
+    if(!loaded) return;
+    if(S.mode==="scroll") return goTo(idx+1);
+    var last=shown.length?shown[shown.length-1]:idx;
+    if(last+1<names.length) show(last+1);
+  }
+  function back(opt){
+    if(!loaded) return;
+    if(S.mode==="scroll") return goTo(idx-1);
+    var f=shown.length?shown[0]:idx;
+    if(f>0) show(f-1,{endAt:f-1,bottom:opt&&opt.bottom});
+  }
   function smart(dir){
     var max=stage.scrollHeight-stage.clientHeight;
     if(dir>0){ if(stage.scrollTop<max-4) stage.scrollBy({top:stage.clientHeight*.9,behavior:"smooth"}); else if(S.mode==="page") fwd(); }
-    else{ if(stage.scrollTop>4) stage.scrollBy({top:-stage.clientHeight*.9,behavior:"smooth"}); else if(S.mode==="page") goTo(idx-1,{end:true}); }
+    else{ if(stage.scrollTop>4) stage.scrollBy({top:-stage.clientHeight*.9,behavior:"smooth"}); else if(S.mode==="page") back({bottom:true}); }
   }
 
   /* ---------- events ---------- */
@@ -310,6 +408,9 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   pgIn.onchange=function(){ var v=parseInt(pgIn.value,10); if(v>=1) goTo(v-1); pgIn.blur(); };
   document.querySelectorAll("[data-fit]").forEach(function(b){ b.onclick=function(){ setFit(b.dataset.fit); }; });
   document.querySelectorAll("[data-mode]").forEach(function(b){ b.onclick=function(){ setMode(b.dataset.mode); }; });
+  $("two").onclick=function(){ setTwo(!S.two); };
+  $("thumbBtn").onclick=function(){ setThumbs(!S.thumbs); };
+  $("cover").onchange=function(){ S.cover=this.checked; persist(); if(loaded&&S.two&&S.mode==="page") goTo(idx); };
   $("zi").onclick=function(){ setZoom(S.z*1.25); };
   $("zo").onclick=function(){ setZoom(S.z/1.25); };
   $("zr").onclick=function(){ setZoom(1); };
@@ -353,7 +454,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   });
 
   document.addEventListener("keydown",function(e){
-    if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.target.tagName==="INPUT"&&e.target.type!=="range"&&e.target.type!=="checkbox") return;
     if(e.ctrlKey||e.metaKey||e.altKey){ if((e.ctrlKey||e.metaKey)&&e.key==="o"){ e.preventDefault(); pick(); } return; }
     var k=e.key;
     if(k==="?"){ toggleHelp(); return; }
@@ -371,7 +472,9 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     else if(k==="-"||k==="_"){ setZoom(S.z/1.25); }
     else if(k==="0"){ setZoom(1); }
     else if(k==="1"){ setFit("w"); } else if(k==="2"){ setFit("h"); } else if(k==="3"){ setFit("o"); }
+    else if(k==="d"){ setTwo(!S.two); }
     else if(k==="v"){ setMode(S.mode==="page"?"scroll":"page"); }
+    else if(k==="t"){ setThumbs(!S.thumbs); }
     else if(k==="r"){ setRtl(!S.rtl); }
     else if(k==="h"){ toggleUi(); }
     else if(k==="g"){ pgIn.focus(); pgIn.select(); e.preventDefault(); }
