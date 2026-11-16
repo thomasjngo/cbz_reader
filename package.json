@@ -1,0 +1,23 @@
+{
+  "name": "cbz-reader",
+  "version": "1.0.0",
+  "description": "A simple, private CBZ comic reader for the desktop and the browser.",
+  "main": "main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "io.github.cbzreader",
+    "productName": "CBZ Reader",
+    "files": ["main.js", "src/**"],
+    "mac": { "target": "dmg", "category": "public.app-category.entertainment" },
+    "win": { "target": "nsis" },
+    "linux": { "target": "AppImage", "category": "Graphics" }
+  }
+}
