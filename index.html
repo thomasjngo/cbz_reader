@@ -22,7 +22,7 @@
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Figtree",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;display:flex;flex-direction:column;overflow:hidden}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 header,footer{display:flex;gap:.5rem;padding:.5rem .75rem;background:var(--panel)}
 header{align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
 footer{display:none;flex-direction:column;border-top:1px solid var(--line)}
@@ -84,31 +84,56 @@ dialog td{padding:.25rem 0;vertical-align:top}
 dialog td:first-child{padding-right:1rem;white-space:nowrap;color:var(--mute)}
 dialog label{display:flex;gap:.5rem;align-items:center;margin-bottom:1rem}
 kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem;background:var(--bg)}
+.btn[hidden]{display:none}
+#lib{display:none;flex:1;min-height:0;overflow:auto;padding:1rem 1.25rem 2rem}
+body.inlib #lib{display:block}
+body.inlib #stage,body.inlib footer{display:none!important}
+body.inlib .rd{display:none}
+.lbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem}
+.ltitle{display:flex;align-items:baseline;gap:.6rem;flex:1 1 12rem;min-width:0}
+.ltitle h2{margin:0;font-size:1.4rem;font-weight:700;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lcount,#lnote,#lhint{color:var(--mute)}
+#lnote{min-height:1.2em;margin-bottom:.6rem}
+#lhint{margin:0 0 .75rem;font-size:.85rem}
+#lq{flex:1 1 12rem;min-width:0;padding:.45rem .7rem;background:var(--bg);border:1px solid var(--line);border-radius:8px}
+#lsort{padding:.4rem .6rem;background:var(--bg);border:1px solid var(--line);border-radius:8px}
+#lcont{margin-bottom:1rem;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:1.2rem 1rem}
+.card{background:none;border:0;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.cv{aspect-ratio:2/3;border-radius:8px;background:var(--panel) center/cover no-repeat;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:.8rem}
+.card:hover .cv{border-color:var(--mute)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.ct{font-weight:600;font-size:.88rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.cs{font-size:.78rem;color:var(--mute)}
+.lempty{grid-column:1/-1;color:var(--mute);padding:2rem 0;text-align:center}
 @media (max-width:700px){.lbl{display:none}header{gap:.35rem}.pgl .of{display:none}}
 </style>
 </head>
 <body>
 <header>
   <button class="btn" id="openBtn" type="button" title="Open a comic (Ctrl/Cmd+O)"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="lbl">Open</span></button>
+  <button class="btn" id="libBtn" type="button" aria-pressed="false" title="Library (l)"><svg viewBox="0 0 24 24"><path d="M4 4v16M9 4v16M14 6l5 14"/></svg><span class="lbl">Library</span></button>
   <span id="title">No comic loaded</span>
   <div class="ctl">
-    <div class="seg" role="group" aria-label="Reading mode">
+    <div class="seg rd" role="group" aria-label="Reading mode">
       <button class="btn" type="button" data-mode="page" title="One screen at a time (v)">Page</button>
       <button class="btn" type="button" data-mode="scroll" title="Continuous vertical scroll (v)">Scroll</button>
     </div>
-    <button class="btn" type="button" id="two" aria-pressed="false" title="Two-page spreads (d)">2 pages</button>
-    <div class="seg" role="group" aria-label="Fit">
+    <button class="btn rd" type="button" id="two" aria-pressed="false" title="Two-page spreads (d)">2 pages</button>
+    <div class="seg rd" role="group" aria-label="Fit">
       <button class="btn" type="button" data-fit="w" title="Fit width (1)">Width</button>
       <button class="btn" type="button" data-fit="h" title="Fit whole page (2)">Fit</button>
       <button class="btn" type="button" data-fit="o" title="Actual size (3)">Actual</button>
     </div>
-    <div class="seg" role="group" aria-label="Zoom">
+    <div class="seg rd" role="group" aria-label="Zoom">
       <button class="btn ic" type="button" id="zo" title="Zoom out (-)" aria-label="Zoom out">−</button>
       <button class="btn" type="button" id="zr" title="Reset zoom (0)">100%</button>
       <button class="btn ic" type="button" id="zi" title="Zoom in (+)" aria-label="Zoom in">+</button>
     </div>
-    <button class="btn" type="button" id="dir" aria-pressed="false" title="Right-to-left reading (r)">Manga</button>
-    <button class="btn" type="button" id="thumbBtn" aria-pressed="true" title="Page previews (t)">Previews</button>
+    <button class="btn rd" type="button" id="dir" aria-pressed="false" title="Right-to-left reading (r)">Manga</button>
+    <button class="btn rd" type="button" id="thumbBtn" aria-pressed="true" title="Page previews (t)">Previews</button>
     <button class="btn ic" type="button" id="theme" title="Theme: auto" aria-label="Change theme">◐</button>
     <button class="btn ic" type="button" id="fs" title="Fullscreen (f)" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="btn ic" type="button" id="helpBtn" title="Help and shortcuts (?)" aria-label="Help">?</button>
@@ -120,13 +145,40 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   <div id="empty">
     <h1>Open a comic to start reading</h1>
     <p>Drop a .cbz file anywhere on this page, or choose one from your device. Files are read in your browser and never uploaded.</p>
-    <button class="btn primary" id="openBtn2" type="button">Choose a .cbz file</button>
+    <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap"><button class="btn primary" id="openBtn2" type="button">Choose a .cbz file</button><button class="btn" id="libOpen" type="button">Open a library folder</button></div>
     <div id="msg" role="status"></div>
     <small>Press <kbd>?</kbd> any time for controls.</small>
   </div>
   <div id="spread"><img id="page" alt="" draggable="false"><img id="page2" alt="" draggable="false" style="display:none"></div>
   <div id="strip"></div>
 </main>
+
+<section id="lib" aria-label="Library">
+  <div class="lbar">
+    <div class="ltitle"><h2 id="lname">Library</h2><span id="lcount"></span></div>
+    <button class="btn" type="button" id="lchoose">Choose folder</button>
+    <button class="btn" type="button" id="lrescan">Rescan</button>
+  </div>
+  <div id="lnote" role="status"></div>
+  <p id="lhint" hidden>This browser can’t remember your folder between visits, so you’ll pick it again next time. Your reading progress is still saved.</p>
+  <div class="lbar">
+    <input id="lq" type="search" placeholder="Search your library" aria-label="Search your library">
+    <div class="seg" role="group" aria-label="Filter">
+      <button class="btn" type="button" data-lf="all">All</button>
+      <button class="btn" type="button" data-lf="reading">Reading</button>
+      <button class="btn" type="button" data-lf="unread">Unread</button>
+      <button class="btn" type="button" data-lf="finished">Finished</button>
+    </div>
+    <select id="lsort" aria-label="Sort by">
+      <option value="name">Sort: Name</option>
+      <option value="recent">Sort: Recently read</option>
+      <option value="added">Sort: Newest file</option>
+    </select>
+  </div>
+  <button class="btn primary" type="button" id="lcont" hidden></button>
+  <div id="lgrid"></div>
+</section>
+<input id="dirInput" type="file" webkitdirectory multiple hidden>
 
 <footer>
   <div id="thumbs" aria-label="Page previews"></div>
@@ -157,6 +209,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
     <tr><td><kbd>r</kbd></td><td>Right-to-left (manga) mode</td></tr>
     <tr><td><kbd>h</kbd></td><td>Hide or show the toolbars</td></tr>
     <tr><td><kbd>g</kbd></td><td>Jump to a page number</td></tr>
+    <tr><td><kbd>l</kbd></td><td>Open or close the library</td></tr>
     <tr><td><kbd>f</kbd></td><td>Fullscreen</td></tr>
   </table>
   <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
@@ -170,7 +223,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   var $=function(id){return document.getElementById(id)};
   var stage=$("stage"), img=$("page"), img2=$("page2"), strip=$("strip"), thumbs=$("thumbs"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
   var zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
-  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700};
+  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all"};
   var MIME={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",avif:"image/avif",bmp:"image/bmp"};
 
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
@@ -221,18 +274,23 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   function toggleUi(){ document.body.classList.toggle("noui"); if(document.body.classList.contains("noui")) toast("Click the middle of the page to show toolbars"); }
 
   /* ---------- opening a file ---------- */
+  function imageList(z){
+    var list=Object.keys(z.files).filter(function(n){
+      return !z.files[n].dir && MIME[extOf(n)] && n.indexOf("__MACOSX")<0 && n.split("/").pop().charAt(0)!==".";
+    });
+    list.sort(function(a,b){ return a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}); });
+    return list;
+  }
   async function load(file){
     msg.className=""; msg.textContent="Opening…";
     try{
       var z=await JSZip.loadAsync(file);
-      var list=Object.keys(z.files).filter(function(n){
-        return !z.files[n].dir && MIME[extOf(n)] && n.indexOf("__MACOSX")<0 && n.split("/").pop().charAt(0)!==".";
-      });
-      list.sort(function(a,b){ return a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}); });
+      var list=imageList(z);
       if(!list.length) throw new Error("empty");
       zip=z; names=list; cache={}; dc={}; shown=[]; token++; loaded=true;
-      key="cbz:"+file.name+":"+file.size;
-      var p=parseInt(ls(key),10); idx=p>=0&&p<names.length?p:0;
+      key=pkey(file.name,file.size);
+      var pr=getProg(file.name,file.size), p=pr?pr.p:-1; idx=p>=0&&p<names.length?p:0;
+      if(idx>0) toast("Resumed at page "+(idx+1));
       $("title").textContent=file.name.replace(/\.(cbz|zip)$/i,"");
       document.title=file.name+" – CBZ Reader";
       scrub.max=names.length; pgIn.max=names.length; $("tot").textContent=names.length;
@@ -240,10 +298,13 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
       strip.innerHTML=""; strip.style.removeProperty("--dar");
       buildThumbs();
       if(S.mode==="scroll") buildStrip();
+      if(inLib()) relayout=true;
       goTo(idx);
+      return true;
     }catch(e){
       msg.className="err";
       msg.textContent=e&&e.message==="empty"?"No images were found in that file.":"That file couldn’t be opened. CBZ files are ZIP archives; CBR (RAR) files aren’t supported.";
+      return false;
     }
   }
 
@@ -317,7 +378,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   }
   var pending=false;
   function refresh(){
-    if(pending||!loaded||S.mode!=="scroll") return;
+    if(pending||!loaded||S.mode!=="scroll"||inLib()) return;
     pending=true;
     requestAnimationFrame(function(){
       pending=false;
@@ -369,7 +430,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
 
   /* ---------- navigation ---------- */
   function updateNav(){
-    scrub.value=idx+1; pgIn.value=idx+1; ls(key,String(idx));
+    scrub.value=idx+1; pgIn.value=idx+1; setProg();
     thumbs.querySelectorAll(".cur").forEach(function(t){ t.classList.remove("cur"); });
     var cur=S.mode==="page"&&shown.length?shown:[idx];
     cur.forEach(function(i){ if(thumbs.children[i]) thumbs.children[i].classList.add("cur"); });
@@ -423,7 +484,7 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   $("helpBtn").onclick=toggleHelp; $("helpClose").onclick=function(){ help.close(); };
   var pick=function(){ $("file").click(); };
   $("openBtn").onclick=pick; $("openBtn2").onclick=pick;
-  $("file").onchange=function(){ if(this.files[0]) load(this.files[0]); this.value=""; };
+  $("file").onchange=function(){ if(this.files[0]) load(this.files[0]).then(function(ok){ if(ok) showLib(false); }); this.value=""; };
 
   stage.addEventListener("wheel",function(e){
     if(!(e.ctrlKey||e.metaKey)||!loaded) return;
@@ -454,11 +515,16 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   });
 
   document.addEventListener("keydown",function(e){
-    if(e.target.tagName==="INPUT"&&e.target.type!=="range"&&e.target.type!=="checkbox") return;
+    if(e.target.tagName==="SELECT"||e.target.tagName==="INPUT"&&e.target.type!=="range"&&e.target.type!=="checkbox") return;
     if(e.ctrlKey||e.metaKey||e.altKey){ if((e.ctrlKey||e.metaKey)&&e.key==="o"){ e.preventDefault(); pick(); } return; }
     var k=e.key;
     if(k==="?"){ toggleHelp(); return; }
-    if(help.open||!loaded&&k!=="f"&&k!=="r") return;
+    if(help.open) return;
+    var il=inLib();
+    if(k==="l"){ showLib(!il); return; }
+    if(k==="Escape"&&il&&loaded){ showLib(false); return; }
+    if(k==="f"){ toggleFs(); return; }
+    if(il||!loaded&&k!=="r") return;
     if(k==="ArrowRight"){ S.rtl?back():fwd(); }
     else if(k==="ArrowLeft"){ S.rtl?fwd():back(); }
     else if(k==="ArrowDown"){ stage.scrollBy({top:80}); e.preventDefault(); }
@@ -488,10 +554,193 @@ kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 .35rem
   window.addEventListener("drop",function(e){
     e.preventDefault(); depth=0; dz.classList.remove("on");
     var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
-    if(f) load(f);
+    if(f) load(f).then(function(ok){ if(ok) showLib(false); });
   });
 
+  /* ---------- progress ---------- */
+  function pkey(n,s){ return "cbz:p:"+n+":"+s; }
+  function getProg(n,s){
+    try{ var v=JSON.parse(ls(pkey(n,s))); if(v&&v.p>=0) return v; }catch(e){}
+    var o=parseInt(ls("cbz:"+n+":"+s),10); return o>=0?{p:o,n:0,t:0}:null;
+  }
+  function setProg(){ if(key&&names.length) ls(key,JSON.stringify({p:idx,n:names.length,t:Date.now()})); }
+
+  /* ---------- storage for folder handle and covers ---------- */
+  var dbp=null;
+  function db(){
+    if(!dbp) dbp=new Promise(function(res,rej){
+      try{ var r=indexedDB.open("cbzreader",1); r.onupgradeneeded=function(){ r.result.createObjectStore("kv"); }; r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); }; }catch(e){ rej(e); }
+    });
+    return dbp;
+  }
+  function kv(mode,fn){
+    return db().then(function(d){ return new Promise(function(res,rej){
+      var t=d.transaction("kv",mode), rq=fn(t.objectStore("kv"));
+      t.oncomplete=function(){ res(rq&&rq.result); }; t.onerror=function(){ rej(t.error); };
+    }); });
+  }
+  function kvGet(k){ return kv("readonly",function(s){ return s.get(k); }).catch(function(){ return undefined; }); }
+  function kvSet(k,v){ return kv("readwrite",function(s){ return s.put(v,k); }).catch(function(){}); }
+
+  /* ---------- library ---------- */
+  var dirHandle=null, needPerm=false, libItems=[], libMap={}, lgrid=$("lgrid"), lcgen=0, cq=[], cbusy=0, cio=null, sv0={t:0,l:0}, relayout=false;
+  function inLib(){ return document.body.classList.contains("inlib"); }
+  function lnote(t){ $("lnote").textContent=t; }
+  function showLib(v){
+    var was=inLib();
+    if(v&&!was&&loaded) sv0={t:stage.scrollTop,l:stage.scrollLeft};
+    document.body.classList.toggle("inlib",v); $("libBtn").setAttribute("aria-pressed",v);
+    if(v) renderLib();
+    else if(was&&loaded){
+      if(relayout){ relayout=false; goTo(idx); }
+      else{ stage.scrollTop=sv0.t; stage.scrollLeft=sv0.l; refresh(); }
+    }
+  }
+  function stat(it){
+    var pr=getProg(it.name,it.size), n=(pr&&pr.n)||(it.meta&&it.meta.n)||0;
+    if(!pr) return {k:"unread",n:n,pct:0,t:0,txt:n?n+" pages":"Not started"};
+    if(n&&pr.p>=n-1) return {k:"finished",n:n,pct:100,t:pr.t||0,txt:"Finished"};
+    return {k:"reading",n:n,pct:n?Math.round((pr.p+1)/n*100):0,t:pr.t||0,txt:"Page "+(pr.p+1)+(n?" of "+n:"")};
+  }
+  function title(it){ return it.name.replace(/\.cbz$/i,""); }
+
+  async function walk(dir,prefix,out,depth){
+    for await (const h of dir.values()){
+      if(h.kind==="directory"){
+        if(depth<8&&h.name.charAt(0)!==".") await walk(h,prefix+h.name+"/",out,depth+1);
+      }else if(/\.cbz$/i.test(h.name)){
+        const f=await h.getFile();
+        out.push({path:prefix+h.name,name:h.name,size:f.size,mtime:f.lastModified,getFile:function(){ return h.getFile(); }});
+        if(out.length%25===0) lnote("Scanning… "+out.length+" found");
+      }
+    }
+  }
+  async function scan(){
+    if(!dirHandle) return;
+    $("lname").textContent=dirHandle.name; lnote("Scanning…");
+    var out=[];
+    try{ await walk(dirHandle,"",out,0); }
+    catch(e){ lnote("Couldn’t read that folder. Try choosing it again."); return; }
+    await finishScan(out);
+  }
+  async function finishScan(out){
+    out.sort(function(a,b){ return a.path.localeCompare(b.path,undefined,{numeric:true,sensitivity:"base"}); });
+    libMap={};
+    for(var i=0;i<out.length;i++){
+      var it=out[i], m=await kvGet("m:"+it.path);
+      if(m&&m.size===it.size&&m.mtime===it.mtime) it.meta=m;
+      libMap[it.path]=it;
+    }
+    libItems=out;
+    lnote(out.length?"":"No .cbz files were found in that folder.");
+    renderLib();
+  }
+  async function chooseFolder(){
+    if(window.showDirectoryPicker){
+      var h;
+      try{ h=await window.showDirectoryPicker({id:"cbzlib",mode:"read"}); }catch(e){ return; }
+      dirHandle=h; needPerm=false; kvSet("dir",h); scan();
+    }else $("dirInput").click();
+  }
+  $("dirInput").onchange=function(){
+    var fs=Array.prototype.filter.call(this.files,function(f){ return /\.cbz$/i.test(f.name); });
+    this.value="";
+    var out=fs.map(function(f){ return {path:f.webkitRelativePath||f.name,name:f.name,size:f.size,mtime:f.lastModified,getFile:function(){ return Promise.resolve(f); }}; });
+    dirHandle=null;
+    $("lname").textContent=((fs[0]&&fs[0].webkitRelativePath)||"").split("/")[0]||"Library";
+    finishScan(out);
+  };
+  async function reconnect(){
+    try{ var p=await dirHandle.requestPermission({mode:"read"}); if(p==="granted"){ needPerm=false; lnote(""); scan(); } }catch(e){}
+  }
+  function showReconnect(){
+    var n=$("lnote"); n.textContent="Reconnect to “"+dirHandle.name+"” to see your library again. ";
+    var b=document.createElement("button"); b.className="btn primary"; b.textContent="Reconnect"; b.onclick=reconnect; n.appendChild(b);
+  }
+  async function initLib(){
+    $("lhint").hidden=!!window.showDirectoryPicker;
+    var h=await kvGet("dir"); if(!h) return;
+    dirHandle=h; $("lname").textContent=h.name; showLib(true);
+    var p="prompt"; try{ p=await h.queryPermission({mode:"read"}); }catch(e){}
+    if(p==="granted") scan(); else{ needPerm=true; showReconnect(); }
+  }
+
+  function renderLib(){
+    if(!inLib()) return;
+    document.querySelectorAll("[data-lf]").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.lf===S.lfilter); });
+    $("lsort").value=S.lsort;
+    var q=$("lq").value.trim().toLowerCase();
+    libItems.forEach(function(it){ it.st=stat(it); });
+    var arr=libItems.filter(function(it){ return (!q||it.path.toLowerCase().indexOf(q)>=0)&&(S.lfilter==="all"||it.st.k===S.lfilter); });
+    if(S.lsort==="recent") arr.sort(function(a,b){ return b.st.t-a.st.t; });
+    else if(S.lsort==="added") arr.sort(function(a,b){ return b.mtime-a.mtime; });
+    lgrid.innerHTML=""; lcgen++; cq=[]; if(cio) cio.disconnect();
+    cio=new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ cio.unobserve(en.target); var it=libMap[en.target.dataset.p]; if(it&&!it.meta) cq.push(it); } });
+      cpump();
+    },{root:$("lib"),rootMargin:"400px"});
+    arr.forEach(function(it){
+      var c=document.createElement("button"), cv=document.createElement("div"), t=document.createElement("div"), bar=document.createElement("div"), bi=document.createElement("i"), s=document.createElement("div");
+      c.type="button"; c.className="card"; c.dataset.p=it.path; c.title=it.path;
+      cv.className="cv";
+      if(it.meta&&it.meta.cover) cv.style.backgroundImage="url("+it.meta.cover+")"; else if(it.meta&&it.meta.bad) cv.textContent="No preview";
+      t.className="ct"; t.textContent=title(it);
+      bar.className="bar"; bi.style.width=it.st.pct+"%"; bar.appendChild(bi);
+      s.className="cs"; s.textContent=it.st.txt;
+      c.append(cv,t,bar,s); c.onclick=function(){ openItem(it); };
+      lgrid.appendChild(c);
+      if(!it.meta) cio.observe(c);
+    });
+    if(!arr.length){
+      var e=document.createElement("p"); e.className="lempty";
+      e.textContent=libItems.length?"No comics match your search or filter.":(dirHandle||needPerm?"":"Choose a folder to build your library. Covers and your reading progress will appear here.");
+      lgrid.appendChild(e);
+    }
+    $("lcount").textContent=libItems.length?libItems.length+(libItems.length===1?" comic":" comics"):"";
+    var best=null; libItems.forEach(function(it){ if(it.st.k==="reading"&&(!best||it.st.t>best.st.t)) best=it; });
+    var cb=$("lcont"); cb.hidden=!best;
+    if(best){ cb.textContent="Continue reading: "+title(best)+", "+best.st.txt.toLowerCase(); cb.onclick=function(){ openItem(best); }; }
+  }
+  function cpump(){
+    while(cbusy<1&&cq.length){ var g=lcgen; cbusy++; makeCover(cq.shift(),g).then(function(){ cbusy--; cpump(); }); }
+  }
+  async function makeCover(it,g){
+    if(it.meta) return;
+    try{
+      var f=await it.getFile(), z=await JSZip.loadAsync(f), list=imageList(z);
+      if(!list.length) throw new Error("none");
+      var buf=await z.file(list[0]).async("arraybuffer");
+      var bmp=await createImageBitmap(new Blob([buf],{type:MIME[extOf(list[0])]}));
+      var h=360, w=Math.max(1,Math.round(bmp.width*h/bmp.height)), c=document.createElement("canvas");
+      c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h); if(bmp.close) bmp.close();
+      it.meta={cover:c.toDataURL("image/jpeg",.72),n:list.length,size:f.size,mtime:f.lastModified};
+      kvSet("m:"+it.path,it.meta);
+    }catch(e){ it.meta={bad:true,n:0}; }
+    if(g===lcgen&&inLib()) paintCard(it);
+  }
+  function paintCard(it){
+    var c=Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; });
+    if(!c) return;
+    var cv=c.firstChild, st=stat(it);
+    if(it.meta.cover) cv.style.backgroundImage="url("+it.meta.cover+")"; else cv.textContent="No preview";
+    c.lastChild.textContent=st.txt; c.querySelector(".bar i").style.width=st.pct+"%";
+  }
+  async function openItem(it){
+    toast("Opening…");
+    try{ var f=await it.getFile(); if(await load(f)) showLib(false); else toast("Couldn’t open that comic"); }
+    catch(e){ toast("Couldn’t open that comic"); }
+  }
+
+  $("libBtn").onclick=function(){ showLib(!inLib()); };
+  $("libOpen").onclick=function(){ showLib(true); if(!libItems.length&&!dirHandle) chooseFolder(); };
+  $("lchoose").onclick=chooseFolder;
+  $("lrescan").onclick=function(){ if(dirHandle){ if(needPerm) reconnect(); else scan(); } else chooseFolder(); };
+  $("lq").oninput=renderLib;
+  $("lsort").onchange=function(){ S.lsort=this.value; persist(); renderLib(); };
+  document.querySelectorAll("[data-lf]").forEach(function(b){ b.onclick=function(){ S.lfilter=b.dataset.lf; persist(); renderLib(); }; });
+
   apply();
+  initLib();
 })();
 </script>
 </body>
