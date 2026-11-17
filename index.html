@@ -43,11 +43,11 @@ body.loaded #title{color:var(--ink);font-weight:600}
 .seg .btn:last-child{border-radius:0 8px 8px 0}
 .seg .btn[aria-pressed="true"]{position:relative;z-index:1}
 svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-#stage{flex:1;min-height:0;overflow:auto;position:relative;display:flex;align-items:flex-start;scrollbar-gutter:stable;user-select:none;-webkit-user-select:none;--z:1;--sw:800px;--sh:600px}
+#stage{flex:1;min-width:0;min-height:0;overflow:auto;position:relative;display:flex;align-items:flex-start;scrollbar-gutter:stable;user-select:none;-webkit-user-select:none;--z:1;--sw:800px;--sh:600px}
 #stage.grab{cursor:grabbing}
 #spread{display:none;margin:0 auto;flex:none;align-items:center}
 #spread img{display:block;height:auto;-webkit-user-drag:none;--ar:.66}
-#strip{display:none;flex-direction:column;gap:6px;flex:none;min-width:100%;width:max-content}
+#strip{display:none;flex-direction:column;gap:var(--gap,6px);flex:none;min-width:100%;width:max-content}
 .pg{margin:0 auto;flex:none;aspect-ratio:var(--ar,var(--dar,.66));background:color-mix(in srgb,var(--panel) 70%,transparent)}
 .pg img{display:block;width:100%;height:100%;-webkit-user-drag:none}
 body.loaded #stage.page #spread{display:flex}
@@ -108,6 +108,23 @@ body.inlib .rd{display:none}
 .bar i{display:block;height:100%;background:var(--accent)}
 .cs{font-size:.78rem;color:var(--mute)}
 .lempty{grid-column:1/-1;color:var(--mute);padding:2rem 0;text-align:center}
+#ctx{position:fixed;z-index:30;min-width:12.5rem;max-width:18rem;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.3rem;box-shadow:0 8px 28px rgba(0,0,0,.3);display:none}
+#ctx.on{display:block}
+#ctx .ctitle{padding:.35rem .7rem;color:var(--mute);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ctx button{display:block;width:100%;text-align:left;background:none;border:0;padding:.45rem .7rem;border-radius:6px;cursor:pointer}
+#ctx button:hover,#ctx button:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+#ctx hr{border:0;border-top:1px solid var(--line);margin:.25rem 0}
+#view{flex:1;min-height:0;position:relative;display:flex}
+body.inlib #view{display:none}
+#pgnum{display:none;position:absolute;right:1.4rem;bottom:.8rem;background:color-mix(in srgb,var(--ink) 78%,transparent);color:var(--bg);padding:.2rem .7rem;border-radius:999px;font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums;pointer-events:none;z-index:5}
+body.loaded.pgnum #pgnum{display:block}
+.srow{margin-bottom:1rem}
+.srow>label{margin-bottom:.35rem}
+.sctl{display:flex;align-items:center;gap:.75rem}
+.sctl input{flex:1;accent-color:var(--accent)}
+.sctl output{min-width:3.4rem;text-align:right;color:var(--mute)}
+.dbtns{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap}
+dialog .note{color:var(--mute);margin:0 0 1rem}
 @media (max-width:700px){.lbl{display:none}header{gap:.35rem}.pgl .of{display:none}}
 </style>
 </head>
@@ -136,12 +153,13 @@ body.inlib .rd{display:none}
     <button class="btn rd" type="button" id="thumbBtn" aria-pressed="true" title="Page previews (t)">Previews</button>
     <button class="btn ic" type="button" id="theme" title="Theme: auto" aria-label="Change theme">◐</button>
     <button class="btn ic" type="button" id="fs" title="Fullscreen (f)" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="btn ic" type="button" id="settingsBtn" title="Settings (s)" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     <button class="btn ic" type="button" id="helpBtn" title="Help and shortcuts (?)" aria-label="Help">?</button>
   </div>
   <input id="file" type="file" accept=".cbz,.zip,application/vnd.comicbook+zip,application/zip" hidden>
 </header>
 
-<main id="stage" class="w page">
+<div id="view"><main id="stage" class="w page">
   <div id="empty">
     <h1>Open a comic to start reading</h1>
     <p>Drop a .cbz file anywhere on this page, or choose one from your device. Files are read in your browser and never uploaded.</p>
@@ -152,6 +170,8 @@ body.inlib .rd{display:none}
   <div id="spread"><img id="page" alt="" draggable="false"><img id="page2" alt="" draggable="false" style="display:none"></div>
   <div id="strip"></div>
 </main>
+  <div id="pgnum" aria-hidden="true"></div>
+</div>
 
 <section id="lib" aria-label="Library">
   <div class="lbar">
@@ -192,6 +212,19 @@ body.inlib .rd{display:none}
 
 <div id="drop">Drop your .cbz file to open it</div>
 <div id="toast" role="status"></div>
+<div id="ctx" role="menu" aria-label="Comic options"></div>
+
+<dialog id="settings">
+  <h2>Settings</h2>
+  <div class="srow">
+    <label for="gapIn">Gap between pages in Scroll mode</label>
+    <div class="sctl"><input type="range" id="gapIn" min="0" max="60" step="2" value="6"><output id="gapOut" for="gapIn">6 px</output></div>
+  </div>
+  <label><input type="checkbox" id="pgnumChk"> Show the page number in the bottom-right corner</label>
+  <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
+  <p class="note">Your view choices (reading mode, fit, zoom, two-page, direction, theme, previews and these settings) are saved automatically and used every time you open a book.</p>
+  <div class="dbtns"><button class="btn" type="button" id="resetSet">Reset all settings</button><button class="btn primary" type="button" id="setClose">Done</button></div>
+</dialog>
 
 <dialog id="help">
   <h2>Controls</h2>
@@ -209,10 +242,10 @@ body.inlib .rd{display:none}
     <tr><td><kbd>r</kbd></td><td>Right-to-left (manga) mode</td></tr>
     <tr><td><kbd>h</kbd></td><td>Hide or show the toolbars</td></tr>
     <tr><td><kbd>g</kbd></td><td>Jump to a page number</td></tr>
+    <tr><td>Right-click</td><td>In the library: mark a comic as read or unread, regenerate its cover (long-press on touch screens)</td></tr>
     <tr><td><kbd>l</kbd></td><td>Open or close the library</td></tr>
     <tr><td><kbd>f</kbd></td><td>Fullscreen</td></tr>
   </table>
-  <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
   <p style="color:var(--mute);margin:0 0 1rem">In Page mode, click the left or right edge to turn the page and the middle to hide the toolbars. Drag a zoomed page to move around it. Wide pages are always shown on their own.</p>
   <button class="btn primary" type="button" id="helpClose">Got it</button>
 </dialog>
@@ -223,7 +256,8 @@ body.inlib .rd{display:none}
   var $=function(id){return document.getElementById(id)};
   var stage=$("stage"), img=$("page"), img2=$("page2"), strip=$("strip"), thumbs=$("thumbs"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
   var zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
-  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all"};
+  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all",gap:6,pgnum:false};
+  var DEF=JSON.parse(JSON.stringify(S));
   var MIME={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",avif:"image/avif",bmp:"image/bmp"};
 
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
@@ -243,6 +277,8 @@ body.inlib .rd{display:none}
     $("two").setAttribute("aria-pressed",S.two);
     $("thumbBtn").setAttribute("aria-pressed",S.thumbs);
     $("cover").checked=S.cover;
+    $("gapIn").value=S.gap; $("gapOut").textContent=S.gap+" px"; $("pgnumChk").checked=S.pgnum;
+    stage.style.setProperty("--gap",S.gap+"px"); document.body.classList.toggle("pgnum",S.pgnum);
     document.body.classList.toggle("nothumbs",!S.thumbs);
     $("spread").style.flexDirection=S.rtl?"row-reverse":"row";
     scrub.style.direction=S.rtl?"rtl":"ltr";
@@ -433,6 +469,7 @@ body.inlib .rd{display:none}
     scrub.value=idx+1; pgIn.value=idx+1; setProg();
     thumbs.querySelectorAll(".cur").forEach(function(t){ t.classList.remove("cur"); });
     var cur=S.mode==="page"&&shown.length?shown:[idx];
+    $("pgnum").textContent=(cur.length>1?(cur[0]+1)+"–"+(cur[cur.length-1]+1):cur[0]+1)+" / "+names.length;
     cur.forEach(function(i){ if(thumbs.children[i]) thumbs.children[i].classList.add("cur"); });
     var el=thumbs.children[cur[0]];
     if(el&&S.thumbs&&el.scrollIntoView) el.scrollIntoView({inline:"center",block:"nearest"});
@@ -479,6 +516,17 @@ body.inlib .rd{display:none}
   $("theme").onclick=function(){ S.theme={auto:"light",light:"dark",dark:"auto"}[S.theme]; apply(); persist(); toast("Theme: "+S.theme); };
   function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){}); }
   $("fs").onclick=toggleFs;
+  var sdlg=$("settings");
+  function toggleSettings(){ if(sdlg.open) sdlg.close(); else if(sdlg.showModal) sdlg.showModal(); }
+  $("settingsBtn").onclick=toggleSettings; $("setClose").onclick=function(){ sdlg.close(); };
+  $("gapIn").oninput=function(){ S.gap=parseInt(this.value,10); apply(); persist(); if(loaded&&S.mode==="scroll") refresh(); };
+  $("pgnumChk").onchange=function(){ S.pgnum=this.checked; apply(); persist(); };
+  $("resetSet").onclick=function(){
+    Object.keys(DEF).forEach(function(k){ S[k]=DEF[k]; });
+    apply(); persist();
+    if(loaded){ if(S.mode==="scroll") buildStrip(); goTo(idx); }
+    toast("Settings reset");
+  };
   var help=$("help");
   function toggleHelp(){ if(help.open) help.close(); else if(help.showModal) help.showModal(); }
   $("helpBtn").onclick=toggleHelp; $("helpClose").onclick=function(){ help.close(); };
@@ -515,11 +563,13 @@ body.inlib .rd{display:none}
   });
 
   document.addEventListener("keydown",function(e){
+    if(ctx.classList.contains("on")){ ctxKey(e); return; }
     if(e.target.tagName==="SELECT"||e.target.tagName==="INPUT"&&e.target.type!=="range"&&e.target.type!=="checkbox") return;
     if(e.ctrlKey||e.metaKey||e.altKey){ if((e.ctrlKey||e.metaKey)&&e.key==="o"){ e.preventDefault(); pick(); } return; }
     var k=e.key;
     if(k==="?"){ toggleHelp(); return; }
-    if(help.open) return;
+    if(k==="s"&&!help.open){ toggleSettings(); return; }
+    if(help.open||sdlg.open) return;
     var il=inLib();
     if(k==="l"){ showLib(!il); return; }
     if(k==="Escape"&&il&&loaded){ showLib(false); return; }
@@ -597,7 +647,7 @@ body.inlib .rd{display:none}
     }
   }
   function stat(it){
-    var pr=getProg(it.name,it.size), n=(pr&&pr.n)||(it.meta&&it.meta.n)||0;
+    var pr=getProg(it.name,it.size), n=(pr&&pr.n)||(it.meta&&it.meta.n)||it.n||0;
     if(!pr) return {k:"unread",n:n,pct:0,t:0,txt:n?n+" pages":"Not started"};
     if(n&&pr.p>=n-1) return {k:"finished",n:n,pct:100,t:pr.t||0,txt:"Finished"};
     return {k:"reading",n:n,pct:n?Math.round((pr.p+1)/n*100):0,t:pr.t||0,txt:"Page "+(pr.p+1)+(n?" of "+n:"")};
@@ -730,6 +780,69 @@ body.inlib .rd{display:none}
     try{ var f=await it.getFile(); if(await load(f)) showLib(false); else toast("Couldn’t open that comic"); }
     catch(e){ toast("Couldn’t open that comic"); }
   }
+
+  /* ---------- right-click menu ---------- */
+  var ctx=$("ctx");
+  function lsd(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  function kvDel(k){ return kv("readwrite",function(s){ return s.delete(k); }).catch(function(){}); }
+  function closeCtx(){ ctx.classList.remove("on"); }
+  function ctxKey(e){
+    var bs=Array.prototype.slice.call(ctx.querySelectorAll("button")), i=bs.indexOf(document.activeElement);
+    if(e.key==="Escape"||e.key==="Tab"){ e.preventDefault(); closeCtx(); }
+    else if(e.key==="ArrowDown"){ e.preventDefault(); bs[(i+1)%bs.length].focus(); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); bs[(i<=0?bs.length:i)-1].focus(); }
+  }
+  function openCtx(it,x,y){
+    it.st=stat(it); ctx.innerHTML="";
+    var h=document.createElement("div"); h.className="ctitle"; h.textContent=title(it); ctx.appendChild(h);
+    function add(label,fn){
+      var b=document.createElement("button"); b.type="button"; b.setAttribute("role","menuitem"); b.textContent=label;
+      b.onclick=function(){ closeCtx(); fn(); }; ctx.appendChild(b);
+    }
+    add("Open",function(){ openItem(it); });
+    if(it.st.k!=="finished") add("Mark as read",function(){ markRead(it); });
+    if(it.st.k!=="unread") add("Mark as unread",function(){ markUnread(it); });
+    ctx.appendChild(document.createElement("hr"));
+    add("Regenerate cover",function(){ regenCover(it); });
+    ctx.classList.add("on");
+    ctx.style.left=Math.max(4,Math.min(x,window.innerWidth-ctx.offsetWidth-4))+"px";
+    ctx.style.top=Math.max(4,Math.min(y,window.innerHeight-ctx.offsetHeight-4))+"px";
+    ctx.querySelector("button").focus();
+  }
+  async function pageCount(it){
+    var pr=getProg(it.name,it.size), n=(pr&&pr.n)||(it.meta&&it.meta.n)||it.n||0;
+    if(n) return n;
+    try{ var f=await it.getFile(); n=imageList(await JSZip.loadAsync(f)).length; }catch(e){ n=0; }
+    return it.n=n;
+  }
+  function afterMark(msg){ var sp=$("lib").scrollTop; renderLib(); $("lib").scrollTop=sp; toast(msg); }
+  async function markRead(it){
+    var n=await pageCount(it);
+    if(!n){ toast("Couldn’t read that comic"); return; }
+    ls(pkey(it.name,it.size),JSON.stringify({p:n-1,n:n,t:Date.now()}));
+    afterMark("Marked as read");
+  }
+  function markUnread(it){
+    lsd(pkey(it.name,it.size)); lsd("cbz:"+it.name+":"+it.size);
+    afterMark("Marked as unread");
+  }
+  function regenCover(it){
+    it.meta=null; kvDel("m:"+it.path);
+    var c=Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; });
+    if(c){ c.firstChild.style.backgroundImage=""; c.firstChild.textContent=""; }
+    cq.push(it); cpump(); toast("Regenerating cover…");
+  }
+  lgrid.addEventListener("contextmenu",function(e){
+    var c=e.target.closest&&e.target.closest(".card");
+    if(!c||!libMap[c.dataset.p]) return;
+    e.preventDefault();
+    var r=c.getBoundingClientRect();
+    openCtx(libMap[c.dataset.p],e.clientX||r.left+r.width/2,e.clientY||r.top+r.height/2);
+  });
+  document.addEventListener("pointerdown",function(e){ if(!ctx.contains(e.target)) closeCtx(); });
+  window.addEventListener("blur",closeCtx);
+  window.addEventListener("resize",closeCtx);
+  $("lib").addEventListener("scroll",closeCtx,{passive:true});
 
   $("libBtn").onclick=function(){ showLib(!inLib()); };
   $("libOpen").onclick=function(){ showLib(true); if(!libItems.length&&!dirHandle) chooseFolder(); };
