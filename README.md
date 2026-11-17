@@ -1,4 +1,4 @@
-# Tenjin (CBZ Reader)
+# Tenjin (Manga Reader)
 
 A fast, private comic and book reader that runs entirely in your browser. Nothing is ever uploaded: your files, covers and reading progress stay on your device.
 
