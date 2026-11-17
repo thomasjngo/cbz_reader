@@ -1,8 +1,8 @@
-# CBZ Reader
+# Tenjin (CBZ Reader)
 
 A fast, private comic and book reader that runs entirely in your browser. Nothing is ever uploaded: your files, covers and reading progress stay on your device.
 
-**Live version:** https://thomasjngo.github.io/cbz_reader/
+**Live version:** https://thomasjngo.github.io/tenjin/
 
 ## Supported formats
 
