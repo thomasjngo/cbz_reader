@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CBZ Reader</title>
+<title>Tenjin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2347a3ff'/%3E%3Cstop offset='1' stop-color='%230071e3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='15' fill='url(%23g)'/%3E%3Cpath d='M20 16h22a3 3 0 0 1 3 3v29H23a3 3 0 0 1-3-3z' fill='none' stroke='white' stroke-width='3.5' stroke-linejoin='round'/%3E%3Cpath d='M27 25h12M27 32h8' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -47,8 +48,8 @@ svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:2;stro
 .pg img{display:block;width:100%;height:100%;-webkit-user-drag:none}
 body.loaded #stage.page #spread{display:flex}
 body.loaded #stage.scroll #strip{display:flex}
-#stage.w :is(#spread img,.pg){width:calc((var(--sw)*var(--z) - (var(--n,1) - 1)*var(--gap,0px))/var(--n,1))}
-#stage.h :is(#spread img,.pg){width:min(calc((var(--sw)*var(--z) - (var(--n,1) - 1)*var(--gap,0px))/var(--n,1)),calc(var(--sh)*var(--z)*var(--wr,var(--ar,var(--dar,.66)))))}
+#stage.w :is(#spread img,.pg){width:calc(var(--sw)*var(--z)/var(--n,1) - .02px)}
+#stage.h :is(#spread img,.pg){width:min(calc(var(--sw)*var(--z)/var(--n,1) - .02px),calc(var(--sh)*var(--z)*var(--wr,var(--ar,var(--dar,.66)))))}
 #stage.o :is(#spread img,.pg){width:calc(var(--nw,800px)*var(--z))}
 #empty{margin:auto;text-align:center;padding:2rem;max-width:28rem}
 body.loaded #empty{display:none}
@@ -204,11 +205,113 @@ dialog[open]{animation:pop .18s ease-out}
 #ctx.on{animation:pop .12s ease-out}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:700px){body.tleft #thumbs{width:4.4rem;padding:.4rem}}
+/* ---- v7: Tenjin motion and polish ---- */
+:root{--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1)}
+.brand{font-weight:700;letter-spacing:-.02em;margin-right:.15rem}
+@media (max-width:900px){.brand{display:none}}
+.btn{transition:background .2s var(--ease),transform .3s var(--spring),color .2s,filter .2s}
+.btn:active{transform:scale(.95);transition-duration:.08s}
+.seg{position:relative}
+.seg::before{content:"";position:absolute;top:2px;bottom:2px;left:0;width:var(--w,0px);transform:translateX(var(--x,0px));background:var(--seg-on);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.06);pointer-events:none}
+.seg.ready::before{transition:transform .38s var(--spring),width .3s var(--ease)}
+.seg .btn{position:relative;z-index:1}
+.seg .btn[aria-pressed="true"],.seg .btn[aria-pressed="true"]:hover{background:transparent;box-shadow:none;color:var(--ink)}
+@keyframes slidedown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes slideup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+header{animation:slidedown .45s var(--ease)}
+footer{animation:slideup .45s var(--ease)}
+#spread img{box-shadow:0 12px 40px rgba(0,0,0,.2),0 0 0 .5px var(--line)}
+.pg{box-shadow:0 6px 22px rgba(0,0,0,.16)}
+.pg.sp{box-shadow:none}
+@keyframes fadein{from{opacity:0;transform:translateY(8px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes bk{from{opacity:0}to{opacity:1}}
+@keyframes popout{to{opacity:0;transform:scale(.96)}}
+@keyframes bkout{to{opacity:0}}
+#lib,#view{animation:fadein .45s var(--ease)}
+dialog[open]{animation:pop .42s var(--spring)}
+dialog[open]::backdrop{animation:bk .3s ease-out}
+dialog.out{animation:popout .17s ease-in forwards}
+dialog.out::backdrop{animation:bkout .17s ease-in forwards}
+#ctx.on{animation:pop .26s var(--spring);transform-origin:top left}
+#toast{transform:translate(-50%,14px) scale(.96);transition:opacity .25s var(--ease),transform .45s var(--spring)}
+#toast.on{transform:translate(-50%,0) scale(1)}
+@keyframes iconin{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:none}}
+.appicon{animation:iconin .8s var(--spring) backwards;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 12px 30px color-mix(in srgb,var(--accent) 38%,transparent)}
+#empty>:not(.appicon){animation:fadein .7s var(--ease) backwards}
+#empty>h1{animation-delay:.08s}
+#empty>.tag{animation-delay:.14s}
+#empty>p:not(.tag){animation-delay:.2s}
+#empty>div:not(.appicon){animation-delay:.26s}
+#empty>small{animation-delay:.32s}
+#empty .tag{font-size:1.1rem;margin:0 0 1rem}
+.card{transition:transform .35s var(--spring)}
+.card:hover{transform:translateY(-3px)}
+.card:active{transform:scale(.98);transition-duration:.1s}
+@keyframes cardin{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.card.enter{animation:cardin .6s var(--ease) backwards;animation-delay:calc(var(--k,0)*28ms)}
+@keyframes coverin{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.cv.pop{animation:coverin .5s var(--ease)}
+.th{transition:box-shadow .2s var(--ease),transform .35s var(--spring)}
+.th.cur{transform:scale(1.06)}
+body.tleft .th.cur{transform:scale(1.04)}
+input[type=range]::-webkit-slider-thumb{transition:transform .25s var(--spring)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+dialog input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;width:2.75rem;height:1.65rem;margin:0;border-radius:999px;background:var(--fill2);position:relative;cursor:pointer;transition:background .25s var(--ease)}
+dialog input[type=checkbox]::before{content:"";position:absolute;top:2px;left:2px;width:calc(1.65rem - 4px);height:calc(1.65rem - 4px);border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .4s var(--spring)}
+dialog input[type=checkbox]:checked{background:#34c759}
+dialog input[type=checkbox]:checked::before{transform:translateX(1.1rem)}
+dialog label:has(input[type=checkbox]){flex-direction:row-reverse;justify-content:space-between}
+.grp{background:var(--fill);border-radius:14px;padding:0 1rem;margin-bottom:1rem}
+.grp>.srow,.grp>label{margin:0;padding:.8rem 0;border-bottom:.5px solid var(--line)}
+.grp>:last-child{border-bottom:0}
+.grp select{background:var(--fill2)}
+/* ---- v8: preview sides, cloud library, centre button, hover preview ---- */
+body.tleft #thumbs,body.tright #thumbs{flex-direction:column;overflow-x:hidden;overflow-y:auto;height:auto;width:5.6rem;flex:none;padding:.6rem;gap:8px;background:var(--glass)}
+body.tleft #thumbs{border-right:.5px solid var(--line)}
+body.tright #thumbs{border-left:.5px solid var(--line)}
+body.tleft .th,body.tright .th{width:100%;height:auto;aspect-ratio:2/3;flex:none}
+body.tright .th.cur{transform:scale(1.04)}
+body.ttop #mid{flex-direction:column}
+body.ttop #thumbs{flex:none;padding:.5rem .75rem;border-bottom:.5px solid var(--line);background:var(--glass);height:6.4rem}
+@media (max-width:700px){body.tright #thumbs{width:4.4rem;padding:.4rem}}
+#strip.two{gap:var(--gap,10px) 0}
+#centerBtn{position:absolute;left:50%;bottom:.9rem;display:flex;align-items:center;gap:.4rem;padding:.4rem .9rem;border:0;border-radius:999px;background:rgba(30,30,32,.78);color:#fff;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-weight:500;cursor:pointer;z-index:6;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transform:translate(-50%,16px) scale(.94);transition:opacity .25s var(--ease),transform .45s var(--spring)}
+#centerBtn.on{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}
+#centerBtn:active{transform:translate(-50%,0) scale(.95)}
+#centerBtn svg{width:1rem;height:1rem}
+body:not(.loaded) #centerBtn{display:none}
+#tpop{position:fixed;z-index:25;pointer-events:none;opacity:0;transform:scale(.9);transition:opacity .18s var(--ease),transform .3s var(--spring);background:var(--panel);border-radius:12px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.4),0 0 0 .5px var(--line)}
+#tpop.on{opacity:1;transform:none}
+#tpop img{display:block;max-height:min(46vh,380px);max-width:min(34vw,300px);border-radius:7px}
+#tpop span{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.62);color:#fff;border-radius:6px;padding:0 .45rem;font-size:.78rem;font-weight:600}
+#lib[data-src="cloud"] .dev,#lib[data-src="device"] .cld{display:none}
+.cv{position:relative}
+.cv .cloudic{width:34%;height:auto;stroke:var(--mute);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.dl{position:absolute;right:.45rem;bottom:.45rem;width:2.1rem;height:2.1rem;border-radius:50%;background:rgba(0,0,0,.58);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.85);transition:opacity .2s var(--ease),transform .35s var(--spring)}
+.dl svg{width:1.05rem;height:1.05rem;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.card:hover .dl,.card:focus-visible .dl,.dl.run,.dl.ok{opacity:1;transform:none}
+@media (hover:none){.dl{opacity:.92;transform:none}}
+.dl:hover{transform:scale(1.1)}
+.dl.run::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p,0)*1%),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px))}
+.dl.run svg{animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(2px)}}
+.dl.ok{background:var(--accent)}
+.dl.pop{animation:pop .55s var(--spring)}
+#dlbar{margin:0 0 1rem}
+.dlt{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.4rem;color:var(--mute);font-size:.9rem}
+.dlt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlp{height:6px;border-radius:3px;background:var(--fill2);overflow:hidden}
+.dlp i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--accent),#5ac8fa,var(--accent));background-size:200% 100%;animation:shimmer 1.4s linear infinite;transition:width .35s var(--ease)}
+@keyframes shimmer{to{background-position:-200% 0}}
+dialog input[type=text],dialog input[type=password]{width:100%;background:var(--fill);border:0;border-radius:10px;padding:.55rem .8rem}
+dialog a{color:var(--accent)}
 @media (max-width:700px){.lbl{display:none}header{gap:.35rem}.pgl .of{display:none}}
 </style>
 </head>
 <body>
 <header>
+  <span class="brand">Tenjin</span>
   <button class="btn" id="openBtn" type="button" title="Open a comic (Ctrl/Cmd+O)"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="lbl">Open</span></button>
   <button class="btn" id="libBtn" type="button" aria-pressed="false" title="Library (l)"><svg viewBox="0 0 24 24"><path d="M4 4v16M9 4v16M14 6l5 14"/></svg><span class="lbl">Library</span></button>
   <span id="title">No comic loaded</span>
@@ -241,7 +344,8 @@ dialog[open]{animation:pop .18s ease-out}
 <div id="mid"><div id="view"><main id="stage" class="w page">
   <div id="empty">
     <div class="appicon"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h4"/></svg></div>
-    <h1>Open a comic to start reading</h1>
+    <h1>Tenjin</h1>
+    <p class="tag">A quiet place to read your comics and books.</p>
     <p>Drop a comic or book anywhere on this page (CBZ, CBR, PDF, EPUB and more), or choose a file from your device. Everything is read in your browser and never uploaded.</p>
     <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap"><button class="btn primary" id="openBtn2" type="button">Choose a file</button><button class="btn" id="libOpen" type="button">Open a library folder</button></div>
     <div id="msg" role="status"></div>
@@ -251,16 +355,26 @@ dialog[open]{animation:pop .18s ease-out}
   <div id="strip"></div>
 </main>
   <div id="pgnum" aria-hidden="true"></div>
+  <button id="centerBtn" type="button" aria-label="Snap the page back to center" title="Center (c)"><svg viewBox="0 0 24 24"><path d="M3 12h7M21 12h-7M6.5 8.5L3 12l3.5 3.5M17.5 8.5L21 12l-3.5 3.5"/></svg><span>Center</span></button>
 </div>
 </div>
 
 <section id="lib" aria-label="Library">
   <div class="lbar">
     <div class="ltitle"><h2 id="lname">Library</h2><span id="lcount"></span></div>
-    <button class="btn" type="button" id="lchoose">Choose folder</button>
-    <button class="btn" type="button" id="lrescan">Rescan</button>
+    <div class="seg" role="group" aria-label="Library source">
+      <button class="btn" type="button" data-src="device">This device</button>
+      <button class="btn" type="button" data-src="cloud">Google Drive</button>
+    </div>
+    <button class="btn dev" type="button" id="lchoose">Choose folder</button>
+    <button class="btn dev" type="button" id="lrescan">Rescan</button>
+    <button class="btn cld" type="button" id="clink">Link…</button>
+    <button class="btn cld" type="button" id="lrefresh">Refresh</button>
+    <button class="btn cld" type="button" id="dlall">Download all</button>
+    <button class="btn cld" type="button" id="saveall" hidden>Save to folder…</button>
   </div>
   <div id="lnote" role="status"></div>
+  <div id="dlbar" hidden><div class="dlt"><span id="dltxt"></span><button class="btn" type="button" id="dlcancel">Cancel</button></div><div class="dlp"><i id="dlfill"></i></div></div>
   <p id="lhint" hidden>This browser can’t remember your folder between visits, so you’ll pick it again next time. Your reading progress is still saved.</p>
   <div class="lbar">
     <input id="lq" type="search" placeholder="Search your library" aria-label="Search your library">
@@ -293,10 +407,12 @@ dialog[open]{animation:pop .18s ease-out}
 
 <div id="drop">Drop a comic to open it</div>
 <div id="toast" role="status"></div>
+<div id="tpop" aria-hidden="true"><img alt=""><span></span></div>
 <div id="ctx" role="menu" aria-label="Comic options"></div>
 
 <dialog id="settings">
   <h2>Settings</h2>
+  <div class="grp">
   <div class="srow">
     <label for="gapIn">Gap between pages in Scroll mode</label>
     <div class="sctl"><input type="range" id="gapIn" min="0" max="60" step="2" value="10"><output id="gapOut" for="gapIn">10 px</output></div>
@@ -307,12 +423,23 @@ dialog[open]{animation:pop .18s ease-out}
   </div>
   <div class="srow">
     <label for="tposSel">Page previews</label>
-    <select id="tposSel"><option value="bottom">Bottom</option><option value="left">Left side</option></select>
+    <select id="tposSel"><option value="bottom">Bottom</option><option value="top">Top</option><option value="left">Left side</option><option value="right">Right side</option></select>
   </div>
+  <label><input type="checkbox" id="tpopChk"> Enlarge previews when you hover over them</label>
   <label><input type="checkbox" id="pgnumChk"> Show the page number in the bottom-right corner</label>
   <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
+  </div>
   <p class="note">With 2 pages on, Scroll mode lays pages out in rows and wide spreads fill a full row. Your view choices (reading mode, fit, zoom, two-page, direction, theme, previews and these settings) are saved automatically and used every time you open a book.</p>
   <div class="dbtns"><button class="btn" type="button" id="resetSet">Reset all settings</button><button class="btn primary" type="button" id="setClose">Done</button></div>
+</dialog>
+
+<dialog id="cloud">
+  <h2>Connect Google Drive</h2>
+  <p class="note">Paste a Google Drive folder link that is shared as “Anyone with the link”. Tenjin needs a free Google API key to list and download the files. The README has the two-minute setup. Your link and key are stored only in this browser.</p>
+  <div class="srow"><label for="cLink">Folder link</label><input id="cLink" type="text" placeholder="https://drive.google.com/drive/folders/…" spellcheck="false" autocomplete="off"></div>
+  <div class="srow"><label for="cKey">API key</label><input id="cKey" type="password" placeholder="AIza…" spellcheck="false" autocomplete="off"></div>
+  <div id="cMsg" class="note" role="status"></div>
+  <div class="dbtns"><button class="btn" type="button" id="cForget" hidden>Forget link and downloads</button><button class="btn" type="button" id="cCancel">Cancel</button><button class="btn primary" type="button" id="cSave">Connect</button></div>
 </dialog>
 
 <dialog id="help">
@@ -332,6 +459,7 @@ dialog[open]{animation:pop .18s ease-out}
     <tr><td><kbd>h</kbd></td><td>Hide or show the toolbars</td></tr>
     <tr><td><kbd>g</kbd></td><td>Jump to a page number</td></tr>
     <tr><td>Right-click</td><td>In the library: mark a comic as read or unread, regenerate its cover (long-press on touch screens)</td></tr>
+    <tr><td><kbd>c</kbd></td><td>Snap the page back to the center</td></tr>
     <tr><td><kbd>l</kbd></td><td>Open or close the library</td></tr>
     <tr><td><kbd>f</kbd></td><td>Fullscreen</td></tr>
   </table>
@@ -345,7 +473,7 @@ dialog[open]{animation:pop .18s ease-out}
   var $=function(id){return document.getElementById(id)};
   var stage=$("stage"), img=$("page"), img2=$("page2"), strip=$("strip"), thumbs=$("thumbs"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
   var zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
-  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all",gap:10,pgnum:false,wide:"split",tpos:"bottom",v:2};
+  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all",gap:10,pgnum:false,wide:"split",tpos:"bottom",tpop:true,v:2};
   var DEF=JSON.parse(JSON.stringify(S));
   var MIME={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",avif:"image/avif",bmp:"image/bmp"};
 
@@ -365,7 +493,7 @@ dialog[open]{animation:pop .18s ease-out}
     $("dir").setAttribute("aria-pressed",S.rtl);
     $("two").setAttribute("aria-pressed",S.two);
     $("thumbBtn").setAttribute("aria-pressed",S.thumbs);
-    $("cover").checked=S.cover; $("wideSel").value=S.wide; $("tposSel").value=S.tpos; placeThumbs();
+    $("cover").checked=S.cover; $("wideSel").value=S.wide; $("tposSel").value=S.tpos; $("tpopChk").checked=S.tpop; placeThumbs();
     $("gapIn").value=S.gap; $("gapOut").textContent=S.gap+" px"; $("pgnumChk").checked=S.pgnum;
     stage.style.setProperty("--gap",S.gap+"px"); document.body.classList.toggle("pgnum",S.pgnum);
     document.body.classList.toggle("nothumbs",!S.thumbs);
@@ -375,9 +503,10 @@ dialog[open]{animation:pop .18s ease-out}
     $("right").setAttribute("aria-label",S.rtl?"Previous page":"Next page");
     var r=document.documentElement; if(S.theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",S.theme);
     $("theme").title="Theme: "+S.theme;
+    moveSegs(); updateCenter();
   }
   new ResizeObserver(function(){
-    stage.style.setProperty("--sw",stage.clientWidth+"px"); stage.style.setProperty("--sh",stage.clientHeight+"px"); refresh();
+    stage.style.setProperty("--sw",stage.clientWidth+"px"); stage.style.setProperty("--sh",stage.clientHeight+"px"); refresh(); updateCenter();
   }).observe(stage);
 
   function setZoom(z,cx,cy){
@@ -546,7 +675,7 @@ dialog[open]{animation:pop .18s ease-out}
       var pr=getProg(nm,sz), p=pr?pr.p:-1; idx=p>=0&&p<names.length?p:0;
       if(idx>0) toast("Resumed at page "+(idx+1));
       $("title").textContent=bname(nm);
-      document.title=nm+" – CBZ Reader";
+      document.title=nm+" – Tenjin";
       scrub.max=names.length; pgIn.max=names.length; $("tot").textContent=names.length;
       document.body.classList.add("loaded"); msg.textContent="";
       strip.innerHTML=""; pgList=[]; strip.style.removeProperty("--dar");
@@ -573,16 +702,18 @@ dialog[open]{animation:pop .18s ease-out}
     try{ await t.decode(); }catch(e){}
     return dc[i]={w:t.naturalWidth||1,h:t.naturalHeight||1};
   }
-  function fade(el){
-    if(!el.animate||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-    el.animate([{opacity:.2},{opacity:1}],{duration:200,easing:"ease-out"});
+  function reduced(){ return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  function fade(el,dir){
+    if(!el.animate||reduced()) return;
+    var x=(dir||0)*(S.rtl?-1:1)*26;
+    el.animate([{opacity:0,transform:"translateX("+x+"px) scale(.992)"},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.22,1,.36,1)"});
   }
   function wide(d){ return d.w>d.h*1.05; }
 
   /* ---------- page mode (single and two-page) ---------- */
   async function show(i,opt){
     if(!zip) return; opt=opt||{};
-    var n=names.length, my=++token, s=Math.max(0,Math.min(n-1,i)), e=s, back=S.two&&opt.endAt!==undefined;
+    var from=idx, n=names.length, my=++token, s=Math.max(0,Math.min(n-1,i)), e=s, back=S.two&&opt.endAt!==undefined;
     if(S.two){
       if(back){ e=Math.min(n-1,opt.endAt); s=(e===0||(S.cover&&e<=1))?e:e-1; }
       else if(!(S.cover&&s===0)&&s+1<n) e=s+1;
@@ -606,7 +737,7 @@ dialog[open]{animation:pop .18s ease-out}
     if(my!==token) return;
     stage.scrollLeft=(stage.scrollWidth-stage.clientWidth)/2;
     stage.scrollTop=opt.bottom?stage.scrollHeight:0;
-    fade($("spread"));
+    fade($("spread"),s>from?1:s<from?-1:0);
     if(e+1<n) dataUrl(e+1).catch(function(){});
     if(s>0) dataUrl(s-1).catch(function(){});
   }
@@ -672,18 +803,24 @@ dialog[open]{animation:pop .18s ease-out}
 
   /* ---------- thumbnails ---------- */
   var tq=[], tbusy=0, tio=null, tgen=0, tcache={};
+  function vert(){ return S.tpos==="left"||S.tpos==="right"; }
   function placeThumbs(){
-    var left=S.tpos==="left";
-    document.body.classList.toggle("tleft",left);
-    if(left){ if(thumbs.parentNode!==$("mid")) $("mid").insertBefore(thumbs,$("view")); }
-    else if(thumbs.parentNode!==$("foot")) $("foot").insertBefore(thumbs,$("foot").firstChild);
+    var p=S.tpos, b=document.body, mid=$("mid"), view=$("view");
+    ["tleft","tright","ttop"].forEach(function(c){ b.classList.remove(c); });
+    if(p==="left"||p==="top"){
+      b.classList.add(p==="left"?"tleft":"ttop");
+      if(thumbs.parentNode!==mid||thumbs.nextSibling!==view) mid.insertBefore(thumbs,view);
+    }else if(p==="right"){
+      b.classList.add("tright");
+      if(thumbs.parentNode!==mid||thumbs.previousSibling!==view) mid.insertBefore(thumbs,view.nextSibling);
+    }else if(thumbs.parentNode!==$("foot")) $("foot").insertBefore(thumbs,$("foot").firstChild);
   }
   function buildThumbs(){
     tgen++; tq=[]; thumbs.innerHTML=""; if(tio) tio.disconnect();
     tio=new IntersectionObserver(function(es){
       es.forEach(function(en){ if(en.isIntersecting){ tio.unobserve(en.target); tq.push(+en.target.dataset.i); } });
       pump();
-    },{root:thumbs,rootMargin:S.tpos==="left"?"400px 0px":"0px 400px"});
+    },{root:thumbs,rootMargin:vert()?"400px 0px":"0px 400px"});
     names.forEach(function(n,i){
       var d=document.createElement("button");
       d.className="th"; d.type="button"; d.dataset.i=i; d.setAttribute("aria-label","Go to page "+(i+1));
@@ -704,7 +841,7 @@ dialog[open]{animation:pop .18s ease-out}
       var blob=await zip.blob(i,true);
       if(g!==tgen) return;
       var bmp=await createImageBitmap(blob);
-      var h=130, w=Math.max(1,Math.round(bmp.width*h/bmp.height)), c=document.createElement("canvas");
+      var h=260, w=Math.max(1,Math.round(bmp.width*h/bmp.height)), c=document.createElement("canvas");
       c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h);
       if(bmp.close) bmp.close();
       var u=c.toDataURL("image/jpeg",.65); tcache[i]=u;
@@ -719,13 +856,13 @@ dialog[open]{animation:pop .18s ease-out}
     var cur=S.mode==="page"&&shown.length?shown:[idx];
     $("pgnum").textContent=(cur.length>1?(cur[0]+1)+"–"+(cur[cur.length-1]+1):cur[0]+1)+" / "+names.length;
     cur.forEach(function(i){ if(thumbs.children[i]) thumbs.children[i].classList.add("cur"); });
-    var el=thumbs.children[cur[0]], lf=S.tpos==="left";
+    var el=thumbs.children[cur[0]], lf=vert();
     if(el&&S.thumbs&&el.scrollIntoView) el.scrollIntoView({inline:lf?"nearest":"center",block:lf?"center":"nearest"});
   }
   function goTo(i,opt){
     if(!loaded) return;
     i=Math.max(0,Math.min(names.length-1,i));
-    if(S.mode==="scroll"){ idx=i; updateNav(); if(pgList[i]) stage.scrollTop=pgList[i].offsetTop; refresh(); }
+    if(S.mode==="scroll"){ var near=i!==idx&&Math.abs(i-idx)<=2&&!reduced(); idx=i; updateNav(); if(pgList[i]) stage.scrollTo({top:pgList[i].offsetTop,behavior:near?"smooth":"auto"}); refresh(); }
     else show(S.two?align(i):i,opt);
   }
   function fwd(){
@@ -774,12 +911,13 @@ dialog[open]{animation:pop .18s ease-out}
   function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){}); }
   $("fs").onclick=toggleFs;
   var sdlg=$("settings");
-  function toggleSettings(){ if(sdlg.open) sdlg.close(); else if(sdlg.showModal) sdlg.showModal(); }
-  $("settingsBtn").onclick=toggleSettings; $("setClose").onclick=function(){ sdlg.close(); };
+  function toggleSettings(){ if(sdlg.open) closeDlg(sdlg); else if(sdlg.showModal) sdlg.showModal(); }
+  $("settingsBtn").onclick=toggleSettings; $("setClose").onclick=function(){ closeDlg(sdlg); };
   $("gapIn").oninput=function(){ S.gap=parseInt(this.value,10); apply(); persist(); if(loaded&&S.mode==="scroll") refresh(); };
   $("pgnumChk").onchange=function(){ S.pgnum=this.checked; apply(); persist(); };
   $("wideSel").onchange=function(){ S.wide=this.value; persist(); if(loaded&&S.mode==="scroll"){ buildStrip(); goTo(idx); } };
   $("tposSel").onchange=function(){ S.tpos=this.value; apply(); persist(); if(loaded) buildThumbs(); };
+  $("tpopChk").onchange=function(){ S.tpop=this.checked; persist(); hidePop(); };
   $("resetSet").onclick=function(){
     Object.keys(DEF).forEach(function(k){ S[k]=DEF[k]; });
     apply(); persist();
@@ -787,8 +925,8 @@ dialog[open]{animation:pop .18s ease-out}
     toast("Settings reset");
   };
   var help=$("help");
-  function toggleHelp(){ if(help.open) help.close(); else if(help.showModal) help.showModal(); }
-  $("helpBtn").onclick=toggleHelp; $("helpClose").onclick=function(){ help.close(); };
+  function toggleHelp(){ if(help.open) closeDlg(help); else if(help.showModal) help.showModal(); }
+  $("helpBtn").onclick=toggleHelp; $("helpClose").onclick=function(){ closeDlg(help); };
   var pick=function(){ $("file").click(); };
   $("openBtn").onclick=pick; $("openBtn2").onclick=pick;
   $("file").onchange=function(){ var fl=Array.from(this.files); this.value=""; if(fl.length) load(fl).then(function(ok){ if(ok) showLib(false); }); };
@@ -828,7 +966,7 @@ dialog[open]{animation:pop .18s ease-out}
     var k=e.key;
     if(k==="?"){ toggleHelp(); return; }
     if(k==="s"&&!help.open){ toggleSettings(); return; }
-    if(help.open||sdlg.open) return;
+    if(help.open||sdlg.open||$("cloud").open) return;
     var il=inLib();
     if(k==="l"){ showLib(!il); return; }
     if(k==="Escape"&&il&&loaded){ showLib(false); return; }
@@ -853,6 +991,7 @@ dialog[open]{animation:pop .18s ease-out}
     else if(k==="r"){ setRtl(!S.rtl); }
     else if(k==="h"){ toggleUi(); }
     else if(k==="g"){ pgIn.focus(); pgIn.select(); e.preventDefault(); }
+    else if(k==="c"){ snapCenter(); }
     else if(k==="f"){ toggleFs(); }
   });
 
@@ -892,14 +1031,14 @@ dialog[open]{animation:pop .18s ease-out}
   function kvSet(k,v){ return kv("readwrite",function(s){ return s.put(v,k); }).catch(function(){}); }
 
   /* ---------- library ---------- */
-  var dirHandle=null, needPerm=false, libItems=[], libMap={}, lgrid=$("lgrid"), lcgen=0, cq=[], cbusy=0, cio=null, sv0={t:0,l:0}, relayout=false;
+  var localItems=[], cloudItems=[], cloud=null, offSet={}, libSrc=(ls("tenjin:src")==="cloud"?"cloud":"device"), enterNext=false, dirHandle=null, needPerm=false, libItems=[], libMap={}, lgrid=$("lgrid"), lcgen=0, cq=[], cbusy=0, cio=null, sv0={t:0,l:0}, relayout=false;
   function inLib(){ return document.body.classList.contains("inlib"); }
   function lnote(t){ $("lnote").textContent=t; }
   function showLib(v){
     var was=inLib();
     if(v&&!was&&loaded) sv0={t:stage.scrollTop,l:stage.scrollLeft};
-    document.body.classList.toggle("inlib",v); $("libBtn").setAttribute("aria-pressed",v);
-    if(v) renderLib();
+    document.body.classList.toggle("inlib",v); $("libBtn").setAttribute("aria-pressed",v); moveSegs();
+    if(v){ enterNext=true; renderLib(); }
     else if(was&&loaded){
       if(relayout){ relayout=false; goTo(idx); }
       else{ stage.scrollTop=sv0.t; stage.scrollLeft=sv0.l; refresh(); }
@@ -926,7 +1065,7 @@ dialog[open]{animation:pop .18s ease-out}
   }
   async function scan(){
     if(!dirHandle) return;
-    $("lname").textContent=dirHandle.name; lnote("Scanning…");
+    if(libSrc==="device"){ $("lname").textContent=dirHandle.name; lnote("Scanning…"); }
     var out=[];
     try{ await walk(dirHandle,"",out,0); }
     catch(e){ lnote("Couldn’t read that folder. Try choosing it again."); return; }
@@ -934,15 +1073,12 @@ dialog[open]{animation:pop .18s ease-out}
   }
   async function finishScan(out){
     out.sort(function(a,b){ return a.path.localeCompare(b.path,undefined,{numeric:true,sensitivity:"base"}); });
-    libMap={};
-    for(var i=0;i<out.length;i++){
-      var it=out[i], m=await kvGet("m:"+it.path);
-      if(m&&m.size===it.size&&m.mtime===it.mtime) it.meta=m;
-      libMap[it.path]=it;
+    await attachMeta(out);
+    localItems=out;
+    if(libSrc==="device"){
+      useSrc("device"); lnote(out.length?"":"No comics were found in that folder.");
+      enterNext=true; renderLib();
     }
-    libItems=out;
-    lnote(out.length?"":"No comics were found in that folder.");
-    renderLib();
   }
   async function chooseFolder(){
     if(window.showDirectoryPicker){
@@ -968,19 +1104,29 @@ dialog[open]{animation:pop .18s ease-out}
   }
   async function initLib(){
     $("lhint").hidden=!!window.showDirectoryPicker;
-    var h=await kvGet("dir"); if(!h) return;
-    dirHandle=h; $("lname").textContent=h.name; showLib(true);
-    var p="prompt"; try{ p=await h.queryPermission({mode:"read"}); }catch(e){}
-    if(p==="granted") scan(); else{ needPerm=true; showReconnect(); }
+    $("saveall").hidden=!window.showDirectoryPicker;
+    attachCloudCache();
+    var h=await kvGet("dir");
+    if(h){ dirHandle=h; }
+    if(!h&&!cloud) return;
+    useSrc(libSrc==="cloud"&&cloud?"cloud":"device");
+    showLib(true);
+    if(libSrc==="cloud"){ await attachMeta(cloudItems); renderLib(); refreshCloud(); }
+    if(h){
+      var pm="prompt"; try{ pm=await h.queryPermission({mode:"read"}); }catch(e){}
+      if(pm==="granted"){ if(libSrc==="device") scan(); }
+      else{ needPerm=true; if(libSrc==="device") showReconnect(); }
+    }
   }
 
   function renderLib(){
     if(!inLib()) return;
     document.querySelectorAll("[data-lf]").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.lf===S.lfilter); });
+    moveSegs();
     $("lsort").value=S.lsort;
     var q=$("lq").value.trim().toLowerCase();
     libItems.forEach(function(it){ it.st=stat(it); });
-    var arr=libItems.filter(function(it){ return (!q||it.path.toLowerCase().indexOf(q)>=0)&&(S.lfilter==="all"||it.st.k===S.lfilter); });
+    var arr=libItems.filter(function(it){ return (!q||(it.rel||it.path).toLowerCase().indexOf(q)>=0)&&(S.lfilter==="all"||it.st.k===S.lfilter); });
     if(S.lsort==="recent") arr.sort(function(a,b){ return b.st.t-a.st.t; });
     else if(S.lsort==="added") arr.sort(function(a,b){ return b.mtime-a.mtime; });
     lgrid.innerHTML=""; lcgen++; cq=[]; if(cio) cio.disconnect();
@@ -988,21 +1134,24 @@ dialog[open]{animation:pop .18s ease-out}
       es.forEach(function(en){ if(en.isIntersecting){ cio.unobserve(en.target); var it=libMap[en.target.dataset.p]; if(it&&!it.meta) cq.push(it); } });
       cpump();
     },{root:$("lib"),rootMargin:"400px"});
-    arr.forEach(function(it){
+    var enter=enterNext; enterNext=false;
+    arr.forEach(function(it,ci){
       var c=document.createElement("button"), cv=document.createElement("div"), t=document.createElement("div"), bar=document.createElement("div"), bi=document.createElement("i"), s=document.createElement("div");
-      c.type="button"; c.className="card"+(it.st.k==="finished"?" done":""); c.dataset.p=it.path; c.title=it.path;
+      c.type="button"; c.className="card"+(it.st.k==="finished"?" done":""); c.dataset.p=it.path; c.title=it.rel||it.path;
       cv.className="cv";
       if(it.meta&&it.meta.cover) cv.style.backgroundImage="url("+it.meta.cover+")"; else if(it.meta&&it.meta.bad) cv.textContent="No preview";
+      if(it.cloud){ if(!(it.meta&&it.meta.cover)) cv.insertAdjacentHTML("afterbegin",CLOUDIC); cv.appendChild(mkDl(it)); }
       t.className="ct"; t.textContent=title(it);
-      bar.className="bar"; bi.style.width=it.st.pct+"%"; bar.appendChild(bi);
+      bar.className="bar"; bi.style.width=enter?"0%":it.st.pct+"%"; bar.appendChild(bi);
+      if(enter){ c.classList.add("enter"); c.style.setProperty("--k",Math.min(ci,20)); (function(b,pc){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ b.style.width=pc+"%"; }); }); })(bi,it.st.pct); }
       s.className="cs"; s.textContent=it.st.txt;
       c.append(cv,t,bar,s); c.onclick=function(){ openItem(it); };
       lgrid.appendChild(c);
-      if(!it.meta) cio.observe(c);
+      if(!it.meta&&(!it.cloud||offSet[it.fid])) cio.observe(c);
     });
     if(!arr.length){
       var e=document.createElement("p"); e.className="lempty";
-      e.textContent=libItems.length?"No comics match your search or filter.":(dirHandle||needPerm?"":"Choose a folder to build your library. Covers and your reading progress will appear here.");
+      e.textContent=libItems.length?"No comics match your search or filter.":(libSrc==="cloud"||dirHandle||needPerm?"":"Choose a folder to build your library, or connect a Google Drive folder. Covers and your reading progress will appear here.");
       lgrid.appendChild(e);
     }
     $("lcount").textContent=libItems.length?libItems.length+(libItems.length===1?" comic":" comics"):"";
@@ -1015,6 +1164,7 @@ dialog[open]{animation:pop .18s ease-out}
   }
   async function makeCover(it,g){
     if(it.meta) return;
+    if(it.cloud&&!offSet[it.fid]) return;
     try{
       var f=await it.getFile(), src=await openBook([f]);
       if(!src||!src.n) throw new Error("none");
@@ -1030,14 +1180,276 @@ dialog[open]{animation:pop .18s ease-out}
     var c=Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; });
     if(!c) return;
     var cv=c.firstChild, st=stat(it);
-    if(it.meta.cover) cv.style.backgroundImage="url("+it.meta.cover+")"; else cv.textContent="No preview";
+    if(it.meta.cover){ var ci=cv.querySelector(".cloudic"); if(ci) ci.remove(); cv.style.backgroundImage="url("+it.meta.cover+")"; cv.classList.remove("pop"); void cv.offsetWidth; cv.classList.add("pop"); } else cv.textContent="No preview";
     c.lastChild.textContent=st.txt; c.querySelector(".bar i").style.width=st.pct+"%"; c.classList.toggle("done",st.k==="finished");
+  }
+  /* ---------- cloud library (Google Drive) and offline downloads ---------- */
+  var GD="https://www.googleapis.com/drive/v3/files";
+  var CLOUDIC='<svg class="cloudic" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z"/></svg>';
+  var CHECK='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', ARROW='<svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>';
+  var dlCancel=false, dlRunning=false;
+  try{ cloud=JSON.parse(ls("tenjin:cloud")); }catch(e){ cloud=null; }
+  try{ (JSON.parse(ls("tenjin:off"))||[]).forEach(function(id){ offSet[id]=1; }); }catch(e){}
+  function saveOff(){ ls("tenjin:off",JSON.stringify(Object.keys(offSet))); }
+  function gdId(link){
+    var m=/\/folders\/([\w-]{10,})/.exec(link)||/[?&]id=([\w-]{10,})/.exec(link);
+    if(m) return {id:m[1],file:false};
+    m=/\/file\/d\/([\w-]{10,})/.exec(link); if(m) return {id:m[1],file:true};
+    if(/^[\w-]{20,}$/.test(link)) return {id:link,file:false};
+    return null;
+  }
+  function gdErr(e){
+    var m=(e&&e.message)||"";
+    if(/^gd403/.test(m)) return "Google refused the request. Check that the Drive API is enabled for your key, that the key allows this website, and that the folder is shared with “Anyone with the link”.";
+    if(/^gd404/.test(m)) return "Google couldn’t find that folder. Check the link and its sharing settings.";
+    if(/^gd400/.test(m)) return "That API key doesn’t look valid.";
+    if(/^gd429/.test(m)) return "Google is rate-limiting requests. Try again in a minute.";
+    if(m==="cancel") return "Download stopped.";
+    return "Couldn’t reach Google Drive. Showing what was saved earlier.";
+  }
+  function mkCloudItem(o){
+    var it={path:"gd:"+o.id,fid:o.id,name:o.name,rel:o.rel||o.name,size:o.size||0,mtime:o.mtime||0,cloud:true};
+    it.getFile=function(){ return cloudFile(it); };
+    return it;
+  }
+  function attachCloudCache(){
+    try{ var a=JSON.parse(ls("tenjin:clist")); if(a&&a.length) cloudItems=a.map(mkCloudItem); }catch(e){}
+  }
+  function cacheCloud(){
+    ls("tenjin:clist",JSON.stringify(cloudItems.map(function(it){ return {id:it.fid,name:it.name,rel:it.rel,size:it.size,mtime:it.mtime}; })));
+  }
+  async function attachMeta(arr){
+    for(var i=0;i<arr.length;i++){
+      var it=arr[i], m=await kvGet("m:"+it.path);
+      if(m&&m.size===it.size&&m.mtime===it.mtime) it.meta=m;
+    }
+  }
+  function useSrc(name){
+    libSrc=name; ls("tenjin:src",name);
+    libItems=name==="cloud"?cloudItems:localItems; libMap={};
+    libItems.forEach(function(it){ libMap[it.path]=it; });
+    $("lib").dataset.src=name;
+    document.querySelectorAll("[data-src]").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.src===name); });
+    $("lname").textContent=name==="cloud"?((cloud&&cloud.name)||"Google Drive"):(dirHandle?dirHandle.name:"Library");
+    lnote("");
+    if(name==="device"&&needPerm&&dirHandle) showReconnect();
+  }
+  function setSrc(name){
+    if(name==="cloud"&&!(cloud&&cloud.id)){ openCloudDlg(); return; }
+    useSrc(name);
+    if(name==="cloud"){ if(!cloudItems.length) refreshCloud(); else attachMeta(cloudItems).then(renderLib); }
+    else if(!localItems.length&&dirHandle&&!needPerm) scan();
+    enterNext=true; renderLib();
+  }
+  async function gdList(id,key,prefix,out,depth){
+    var tok="";
+    do{
+      var url=GD+"?q="+encodeURIComponent("'"+id+"' in parents and trashed=false")+"&fields="+encodeURIComponent("nextPageToken,files(id,name,mimeType,size,modifiedTime)")+"&pageSize=1000&supportsAllDrives=true&includeItemsFromAllDrives=true&key="+encodeURIComponent(key)+(tok?"&pageToken="+encodeURIComponent(tok):"");
+      var r=await fetch(url); if(!r.ok) throw new Error("gd"+r.status);
+      var j=await r.json(); tok=j.nextPageToken||"";
+      for(var k=0;k<(j.files||[]).length;k++){
+        var f=j.files[k];
+        if(f.mimeType==="application/vnd.google-apps.folder"){ if(depth<6) await gdList(f.id,key,prefix+f.name+"/",out,depth+1); }
+        else if(LIBRE.test(f.name)) out.push(mkCloudItem({id:f.id,name:f.name,rel:prefix+f.name,size:Number(f.size)||0,mtime:Date.parse(f.modifiedTime)||0}));
+      }
+      if(out.length%25===0&&libSrc==="cloud") lnote("Loading from Google Drive… "+out.length+" found");
+    }while(tok);
+  }
+  async function refreshCloud(){
+    if(!cloud) return;
+    lnote("Loading from Google Drive…");
+    var out=[];
+    try{
+      if(cloud.file){
+        var r=await fetch(GD+"/"+cloud.id+"?fields="+encodeURIComponent("id,name,size,modifiedTime")+"&supportsAllDrives=true&key="+encodeURIComponent(cloud.key));
+        if(!r.ok) throw new Error("gd"+r.status);
+        var f=await r.json(); if(LIBRE.test(f.name)) out.push(mkCloudItem({id:f.id,name:f.name,size:Number(f.size)||0,mtime:Date.parse(f.modifiedTime)||0}));
+      }else await gdList(cloud.id,cloud.key,"",out,0);
+    }catch(e){ if(libSrc==="cloud") lnote(gdErr(e)); return; }
+    out.sort(function(a,b){ return a.rel.localeCompare(b.rel,undefined,{numeric:true,sensitivity:"base"}); });
+    await attachMeta(out);
+    cloudItems=out; cacheCloud();
+    if(libSrc==="cloud"){ useSrc("cloud"); lnote(out.length?"":"No comics were found in that Drive folder."); enterNext=true; renderLib(); }
+  }
+  async function gdDownload(it,onp){
+    var r=await fetch(GD+"/"+it.fid+"?alt=media&supportsAllDrives=true&key="+encodeURIComponent(cloud.key));
+    if(!r.ok) throw new Error("gd"+r.status);
+    var total=Number(r.headers.get("content-length"))||it.size||0;
+    if(r.body&&r.body.getReader){
+      var rd=r.body.getReader(), chunks=[], got=0;
+      for(;;){
+        var x=await rd.read(); if(x.done) break;
+        chunks.push(x.value); got+=x.value.length; if(onp) onp(total?Math.min(1,got/total):0);
+        if(dlCancel&&dlRunning){ rd.cancel(); throw new Error("cancel"); }
+      }
+      return new Blob(chunks);
+    }
+    return r.blob();
+  }
+  async function cloudFile(it,onp){
+    if(offSet[it.fid]){
+      var rec=await kvGet("f:"+it.fid);
+      if(rec&&rec.blob) return new File([rec.blob],it.name,{lastModified:it.mtime});
+      delete offSet[it.fid]; saveOff();
+    }
+    var blob=await gdDownload(it,onp);
+    return new File([blob],it.name,{lastModified:it.mtime});
+  }
+  function cardOf(it){ return Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; }); }
+  function mkDl(it){
+    var d=document.createElement("span"), off=!!offSet[it.fid];
+    d.className="dl"+(off?" ok":""); d.setAttribute("role","button");
+    d.title=off?"Downloaded. Click to remove the offline copy":"Download for offline reading"; d.innerHTML=off?CHECK:ARROW;
+    d.onclick=function(e){ e.stopPropagation(); if(offSet[it.fid]) removeDownload(it); else downloadItem(it).catch(function(){}); };
+    return d;
+  }
+  function setRing(it,p,done){
+    var c=cardOf(it), d=c&&c.querySelector(".dl"); if(!d) return;
+    if(done){ d.className="dl ok"; d.innerHTML=CHECK; d.title="Downloaded. Click to remove the offline copy"; d.style.removeProperty("--p"); void d.offsetWidth; d.classList.add("pop"); return; }
+    if(!d.classList.contains("run")){ d.classList.add("run"); d.innerHTML=ARROW; }
+    d.style.setProperty("--p",Math.round(p*100)); d.title=Math.round(p*100)+"%";
+  }
+  function clearRing(it){
+    var c=cardOf(it), d=c&&c.querySelector(".dl");
+    if(d){ d.className="dl"; d.style.removeProperty("--p"); d.innerHTML=ARROW; d.title="Download for offline reading"; }
+  }
+  async function downloadItem(it,cb){
+    if(!it.cloud||offSet[it.fid]||it.dl) return;
+    it.dl=true; setRing(it,0);
+    try{
+      if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
+      var blob=await gdDownload(it,function(p){ setRing(it,p); if(cb) cb(p); });
+      await kv("readwrite",function(st){ return st.put({blob:blob,name:it.name,size:blob.size},"f:"+it.fid); });
+      offSet[it.fid]=1; saveOff(); it.dl=false; setRing(it,1,true);
+      if(!it.meta){ cq.push(it); cpump(); }
+    }catch(e){
+      it.dl=false; clearRing(it);
+      if(!dlRunning&&e.message!=="cancel") toast(/^gd/.test(e.message)?gdErr(e):"Couldn’t save the download. Is your storage full?");
+      throw e;
+    }
+  }
+  async function removeDownload(it){
+    await kvDel("f:"+it.fid); delete offSet[it.fid]; saveOff(); clearRing(it);
+    toast("Removed the offline copy");
+  }
+  async function saveOne(it){
+    toast("Preparing…");
+    try{
+      var f=await cloudFile(it,function(p){ toast("Downloading… "+Math.round(p*100)+"%"); });
+      var a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=it.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); },5000);
+    }catch(e){ toast(gdErr(e)); }
+  }
+  function dlUI(txt,frac,hide){ $("dlbar").hidden=!!hide; $("dltxt").textContent=txt; $("dlfill").style.width=Math.round(frac*100)+"%"; }
+  function dlDone(msg,frac){ dlUI(msg,frac); dlRunning=false; setTimeout(function(){ if(!dlRunning) $("dlbar").hidden=true; },3000); }
+  async function downloadAll(){
+    if(dlRunning) return;
+    var todo=cloudItems.filter(function(it){ return !offSet[it.fid]; });
+    if(!todo.length){ toast("Everything is already downloaded"); return; }
+    dlRunning=true; dlCancel=false;
+    var total=todo.reduce(function(a,it){ return a+(it.size||1); },0), done=0, okc=0;
+    for(var i=0;i<todo.length&&!dlCancel;i++){
+      var it=todo[i], lab="Downloading "+(i+1)+" of "+todo.length+": "+title(it);
+      dlUI(lab,done/total);
+      try{ await downloadItem(it,function(p){ dlUI(lab,(done+(it.size||1)*p)/total); }); okc++; }catch(e){ if(dlCancel) break; }
+      done+=it.size||1;
+    }
+    dlDone(dlCancel?"Stopped. "+okc+" downloaded.":"Downloaded "+okc+" of "+todo.length+" for offline reading.",dlCancel?done/total:1);
+  }
+  async function saveAll(){
+    if(dlRunning||!cloudItems.length) return;
+    var dir; try{ dir=await window.showDirectoryPicker({mode:"readwrite"}); }catch(e){ return; }
+    dlRunning=true; dlCancel=false;
+    var total=cloudItems.reduce(function(a,it){ return a+(it.size||1); },0), done=0, okc=0;
+    for(var i=0;i<cloudItems.length&&!dlCancel;i++){
+      var it=cloudItems[i], lab="Saving "+(i+1)+" of "+cloudItems.length+": "+title(it);
+      dlUI(lab,done/total);
+      try{
+        var f=await cloudFile(it,function(p){ dlUI(lab,(done+(it.size||1)*p)/total); });
+        var parts=(it.rel||it.name).split("/"), nm=parts.pop(), d=dir;
+        for(var k=0;k<parts.length;k++) d=await d.getDirectoryHandle(parts[k],{create:true});
+        var w=await (await d.getFileHandle(nm,{create:true})).createWritable(); await w.write(f); await w.close(); okc++;
+      }catch(e){ if(dlCancel) break; }
+      done+=it.size||1;
+    }
+    dlDone(dlCancel?"Stopped. "+okc+" saved.":"Saved "+okc+" of "+cloudItems.length+" to your folder.",dlCancel?done/total:1);
   }
   async function openItem(it){
     toast("Opening…");
-    try{ var f=await it.getFile(); if(await load([f])) showLib(false); else toast("Couldn’t open that comic"); }
-    catch(e){ toast("Couldn’t open that comic"); }
+    try{
+      var lp=-1, f=it.cloud?await cloudFile(it,function(p){ var q=Math.round(p*10); if(q!==lp&&!offSet[it.fid]){ lp=q; toast("Downloading… "+Math.round(p*100)+"%"); } }):await it.getFile();
+      if(await load([f])) showLib(false); else toast("Couldn’t open that comic");
+    }catch(e){ toast(it.cloud?gdErr(e):"Couldn’t open that comic"); }
   }
+  function openCloudDlg(){
+    $("cLink").value=cloud&&cloud.url||""; $("cKey").value=cloud&&cloud.key||""; $("cMsg").textContent="";
+    $("cForget").hidden=!cloud;
+    var d=$("cloud"); if(d.showModal&&!d.open) d.showModal();
+  }
+  $("cSave").onclick=async function(){
+    var link=$("cLink").value.trim(), key=$("cKey").value.trim(), m=$("cMsg");
+    if(/proton\.me/i.test(link)){ m.textContent="Proton Drive links are end-to-end encrypted, so a web page can’t read them. Download the folder from Proton Drive, then use This device → Choose folder."; return; }
+    var g=gdId(link); if(!g){ m.textContent="That doesn’t look like a Google Drive link."; return; }
+    if(!key){ m.textContent="Add a Google API key. The README explains how to get one for free."; return; }
+    m.textContent="Connecting…";
+    try{
+      var r=await fetch(GD+"/"+g.id+"?fields=name&supportsAllDrives=true&key="+encodeURIComponent(key));
+      if(!r.ok) throw new Error("gd"+r.status);
+      var j=await r.json();
+      cloud={id:g.id,file:g.file,key:key,url:link,name:j.name||"Google Drive"};
+    }catch(e){ m.textContent=gdErr(e); return; }
+    ls("tenjin:cloud",JSON.stringify(cloud)); ls("tenjin:clist","");
+    cloudItems=[]; closeDlg($("cloud")); useSrc("cloud"); enterNext=true; renderLib(); refreshCloud();
+  };
+  $("cCancel").onclick=function(){ closeDlg($("cloud")); };
+  $("cForget").onclick=async function(){
+    var ids=Object.keys(offSet); for(var i=0;i<ids.length;i++) await kvDel("f:"+ids[i]);
+    offSet={}; saveOff(); cloud=null; ls("tenjin:cloud",""); ls("tenjin:clist",""); cloudItems=[];
+    closeDlg($("cloud")); useSrc("device"); enterNext=true; renderLib(); toast("Google Drive link removed");
+  };
+  document.querySelectorAll("[data-src]").forEach(function(b){ b.onclick=function(){ setSrc(b.dataset.src); }; });
+  $("clink").onclick=openCloudDlg;
+  $("lrefresh").onclick=refreshCloud;
+  $("dlall").onclick=downloadAll;
+  $("saveall").onclick=saveAll;
+  $("dlcancel").onclick=function(){ dlCancel=true; };
+
+  /* ---------- snap to center and preview hover ---------- */
+  function updateCenter(){
+    var max=stage.scrollWidth-stage.clientWidth, off=max>4&&Math.abs(stage.scrollLeft-max/2)>8;
+    $("centerBtn").classList.toggle("on",!!(loaded&&off&&!inLib()));
+  }
+  function snapCenter(){ stage.scrollTo({left:(stage.scrollWidth-stage.clientWidth)/2,behavior:reduced()?"auto":"smooth"}); }
+  stage.addEventListener("scroll",updateCenter,{passive:true});
+  window.addEventListener("resize",updateCenter);
+  $("centerBtn").onclick=snapCenter;
+
+  var tpop=$("tpop"), tpImg=tpop.querySelector("img"), tpTimer=0;
+  function hidePop(){ clearTimeout(tpTimer); tpop.classList.remove("on"); }
+  function showPop(b){
+    if(!S.tpop||!(window.matchMedia&&matchMedia("(hover:hover)").matches)) return;
+    var i=+b.dataset.i, u=tcache[i]; if(!u) return;
+    clearTimeout(tpTimer);
+    tpTimer=setTimeout(function(){
+      tpImg.src=u; tpop.querySelector("span").textContent=i+1;
+      var place=function(){
+        var r=b.getBoundingClientRect(), pw=tpop.offsetWidth, ph=tpop.offsetHeight, x, y, p=S.tpos, o;
+        if(p==="top"){ x=r.left+r.width/2-pw/2; y=r.bottom+12; o="50% 0"; }
+        else if(p==="left"){ x=r.right+12; y=r.top+r.height/2-ph/2; o="0 50%"; }
+        else if(p==="right"){ x=r.left-pw-12; y=r.top+r.height/2-ph/2; o="100% 50%"; }
+        else{ x=r.left+r.width/2-pw/2; y=r.top-ph-12; o="50% 100%"; }
+        tpop.style.left=Math.max(8,Math.min(x,window.innerWidth-pw-8))+"px";
+        tpop.style.top=Math.max(8,Math.min(y,window.innerHeight-ph-8))+"px";
+        tpop.style.transformOrigin=o; tpop.classList.add("on");
+      };
+      (tpImg.decode?tpImg.decode().catch(function(){}):Promise.resolve()).then(place);
+    },90);
+  }
+  thumbs.addEventListener("mouseover",function(e){ var b=e.target.closest&&e.target.closest(".th"); if(b) showPop(b); else hidePop(); });
+  thumbs.addEventListener("mouseleave",hidePop);
+  thumbs.addEventListener("scroll",hidePop,{passive:true});
+  thumbs.addEventListener("click",hidePop);
+  window.addEventListener("blur",hidePop);
 
   /* ---------- right-click menu ---------- */
   var ctx=$("ctx");
@@ -1058,6 +1470,11 @@ dialog[open]{animation:pop .18s ease-out}
       b.onclick=function(){ closeCtx(); fn(); }; ctx.appendChild(b);
     }
     add("Open",function(){ openItem(it); });
+    if(it.cloud){
+      if(offSet[it.fid]) add("Remove download",function(){ removeDownload(it); });
+      else add("Download for offline",function(){ downloadItem(it).catch(function(){}); });
+      add("Save to device…",function(){ saveOne(it); });
+    }
     if(it.st.k!=="finished") add("Mark as read",function(){ markRead(it); });
     if(it.st.k!=="unread") add("Mark as unread",function(){ markUnread(it); });
     ctx.appendChild(document.createElement("hr"));
@@ -1109,6 +1526,30 @@ dialog[open]{animation:pop .18s ease-out}
   $("lq").oninput=renderLib;
   $("lsort").onchange=function(){ S.lsort=this.value; persist(); renderLib(); };
   document.querySelectorAll("[data-lf]").forEach(function(b){ b.onclick=function(){ S.lfilter=b.dataset.lf; persist(); renderLib(); }; });
+
+  /* ---------- motion helpers ---------- */
+  function moveSegs(){
+    document.querySelectorAll(".seg").forEach(function(sg){
+      var on=sg.querySelector('.btn[aria-pressed="true"]');
+      if(!on||!on.offsetWidth){ sg.style.setProperty("--w","0px"); return; }
+      sg.style.setProperty("--x",on.offsetLeft+"px"); sg.style.setProperty("--w",on.offsetWidth+"px");
+      if(!sg.classList.contains("ready")) requestAnimationFrame(function(){ sg.classList.add("ready"); });
+    });
+  }
+  window.addEventListener("resize",moveSegs);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(moveSegs);
+  function closeDlg(d){
+    if(!d.open||d.classList.contains("out")) return;
+    d.classList.add("out");
+    setTimeout(function(){ d.classList.remove("out"); d.close(); },reduced()?0:170);
+  }
+  [$("help"),$("settings"),$("cloud")].forEach(function(d){
+    d.addEventListener("cancel",function(e){ e.preventDefault(); closeDlg(d); });
+    d.addEventListener("click",function(e){
+      var r=d.getBoundingClientRect();
+      if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) closeDlg(d);
+    });
+  });
 
   apply();
   initLib();
