@@ -306,6 +306,9 @@ body:not(.loaded) #centerBtn{display:none}
 @keyframes shimmer{to{background-position:-200% 0}}
 dialog input[type=text],dialog input[type=password]{width:100%;background:var(--fill);border:0;border-radius:10px;padding:.55rem .8rem}
 dialog a{color:var(--accent)}
+body.noshadow #spread img,body.noshadow .pg{box-shadow:none}
+.nl{margin:0 0 1rem;padding-left:1.1rem}
+.nl li{margin:.45rem 0}
 @media (max-width:700px){.lbl{display:none}header{gap:.35rem}.pgl .of{display:none}}
 </style>
 </head>
@@ -364,7 +367,7 @@ dialog a{color:var(--accent)}
     <div class="ltitle"><h2 id="lname">Library</h2><span id="lcount"></span></div>
     <div class="seg" role="group" aria-label="Library source">
       <button class="btn" type="button" data-src="device">This device</button>
-      <button class="btn" type="button" data-src="cloud">Google Drive</button>
+      <button class="btn" type="button" data-src="cloud">Online</button>
     </div>
     <button class="btn dev" type="button" id="lchoose">Choose folder</button>
     <button class="btn dev" type="button" id="lrescan">Rescan</button>
@@ -426,20 +429,37 @@ dialog a{color:var(--accent)}
     <select id="tposSel"><option value="bottom">Bottom</option><option value="top">Top</option><option value="left">Left side</option><option value="right">Right side</option></select>
   </div>
   <label><input type="checkbox" id="tpopChk"> Enlarge previews when you hover over them</label>
+  <label><input type="checkbox" id="shadowChk"> Soft shadow around and between pages</label>
   <label><input type="checkbox" id="pgnumChk"> Show the page number in the bottom-right corner</label>
   <label><input type="checkbox" id="cover"> Show the first page alone in two-page mode</label>
   </div>
   <p class="note">With 2 pages on, Scroll mode lays pages out in rows and wide spreads fill a full row. Your view choices (reading mode, fit, zoom, two-page, direction, theme, previews and these settings) are saved automatically and used every time you open a book.</p>
+  <p class="note">Tenjin 1.1.0 · <a href="#" id="newsBtn">What’s new</a></p>
   <div class="dbtns"><button class="btn" type="button" id="resetSet">Reset all settings</button><button class="btn primary" type="button" id="setClose">Done</button></div>
 </dialog>
 
 <dialog id="cloud">
-  <h2>Connect Google Drive</h2>
-  <p class="note">Paste a Google Drive folder link that is shared as “Anyone with the link”. Tenjin needs a free Google API key to list and download the files. The README has the two-minute setup. Your link and key are stored only in this browser.</p>
-  <div class="srow"><label for="cLink">Folder link</label><input id="cLink" type="text" placeholder="https://drive.google.com/drive/folders/…" spellcheck="false" autocomplete="off"></div>
-  <div class="srow"><label for="cKey">API key</label><input id="cKey" type="password" placeholder="AIza…" spellcheck="false" autocomplete="off"></div>
+  <h2>Connect an online library</h2>
+  <p class="note">Paste a public link to a folder. Tenjin reads the folder structure and lists every comic inside it.</p>
+  <div class="srow"><label for="cLink">Folder link</label><input id="cLink" type="text" placeholder="https://…" spellcheck="false" autocomplete="off"></div>
+  <div class="srow" id="keyRow" hidden><label for="cKey">Google API key</label><input id="cKey" type="password" placeholder="AIza…" spellcheck="false" autocomplete="off"></div>
+  <div id="cHint" class="note"></div>
+  <p class="note">Works with Google Drive folders (needs a free API key), GitHub folders, web folders with a file listing, and manifest files (a JSON list of links). The README explains each one. Your link is stored only in this browser.</p>
   <div id="cMsg" class="note" role="status"></div>
   <div class="dbtns"><button class="btn" type="button" id="cForget" hidden>Forget link and downloads</button><button class="btn" type="button" id="cCancel">Cancel</button><button class="btn primary" type="button" id="cSave">Connect</button></div>
+</dialog>
+
+<dialog id="news">
+  <h2>What’s new in Tenjin 1.1.0</h2>
+  <ul class="nl">
+    <li><b>Online libraries.</b> Browse public Google Drive folders, GitHub folders, web folders and manifest files, with your link remembered for next time.</li>
+    <li><b>Offline downloads.</b> Download one book or the whole folder, with a progress ring and animated bar, or save real files to a folder on your computer.</li>
+    <li><b>Page previews</b> can now sit on any side, and they enlarge when you hover over them.</li>
+    <li><b>Snap to center</b> brings a zoomed page back to the middle.</li>
+    <li><b>Two-page mode:</b> the gap now only affects the space below each row, and there is a switch for page shadows.</li>
+    <li><b>Switching between one and two pages</b> now keeps you on the page you were reading.</li>
+  </ul>
+  <div class="dbtns"><button class="btn primary" type="button" id="newsClose">Got it</button></div>
 </dialog>
 
 <dialog id="help">
@@ -472,8 +492,8 @@ dialog a{color:var(--accent)}
 (function(){
   var $=function(id){return document.getElementById(id)};
   var stage=$("stage"), img=$("page"), img2=$("page2"), strip=$("strip"), thumbs=$("thumbs"), scrub=$("scrub"), pgIn=$("pgIn"), msg=$("msg");
-  var zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
-  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all",gap:10,pgnum:false,wide:"split",tpos:"bottom",tpop:true,v:2};
+  var focusP=0, zip=null, names=[], idx=0, shown=[], key="", cache={}, dc={}, token=0, loaded=false;
+  var S={fit:"w",mode:"page",rtl:false,theme:"auto",z:1,two:false,cover:true,thumbs:window.innerWidth>700,lsort:"name",lfilter:"all",gap:10,pgnum:false,wide:"split",tpos:"bottom",tpop:true,shadow:true,v:2};
   var DEF=JSON.parse(JSON.stringify(S));
   var MIME={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",avif:"image/avif",bmp:"image/bmp"};
 
@@ -493,7 +513,7 @@ dialog a{color:var(--accent)}
     $("dir").setAttribute("aria-pressed",S.rtl);
     $("two").setAttribute("aria-pressed",S.two);
     $("thumbBtn").setAttribute("aria-pressed",S.thumbs);
-    $("cover").checked=S.cover; $("wideSel").value=S.wide; $("tposSel").value=S.tpos; $("tpopChk").checked=S.tpop; placeThumbs();
+    $("cover").checked=S.cover; $("wideSel").value=S.wide; $("tposSel").value=S.tpos; $("tpopChk").checked=S.tpop; $("shadowChk").checked=S.shadow; document.body.classList.toggle("noshadow",!S.shadow); placeThumbs();
     $("gapIn").value=S.gap; $("gapOut").textContent=S.gap+" px"; $("pgnumChk").checked=S.pgnum;
     stage.style.setProperty("--gap",S.gap+"px"); document.body.classList.toggle("pgnum",S.pgnum);
     document.body.classList.toggle("nothumbs",!S.thumbs);
@@ -518,11 +538,11 @@ dialog a{color:var(--accent)}
   }
   function setFit(f){ S.fit=f; S.z=1; apply(); persist(); if(loaded){ stage.scrollTo(0,S.mode==="scroll"?stage.scrollTop:0); refresh(); } toast({w:"Fit width",h:"Fit whole page",o:"Actual size"}[f]); }
   function setRtl(v){ S.rtl=v; apply(); persist(); if(loaded&&S.mode==="scroll"){ buildStrip(); goTo(idx); } toast(v?"Right-to-left on":"Right-to-left off"); }
-  function setTwo(v){ S.two=v; apply(); persist(); if(loaded){ if(S.mode==="scroll") buildStrip(); goTo(idx); } toast(v?"Two-page spreads on":"Two-page spreads off"); }
+  function setTwo(v){ S.two=v; apply(); persist(); if(loaded){ if(S.mode==="scroll") buildStrip(); goTo(focusP); } toast(v?"Two-page spreads on":"Two-page spreads off"); }
   function setThumbs(v){ S.thumbs=v; apply(); persist(); if(v) updateNav(); }
   function setMode(m){
     S.mode=m; apply(); persist();
-    if(loaded){ if(m==="scroll"){ shown=[]; buildStrip(); goTo(idx); } else goTo(idx); }
+    if(loaded){ if(m==="scroll"){ shown=[]; buildStrip(); goTo(focusP); } else goTo(focusP); }
     toast(m==="scroll"?"Continuous scroll":"One screen at a time");
   }
   function toggleUi(){ document.body.classList.toggle("noui"); if(document.body.classList.contains("noui")) toast("Click the middle of the page to show toolbars"); }
@@ -664,15 +684,15 @@ dialog a{color:var(--accent)}
     return "That file couldn’t be opened. Supported: CBZ, CBR, CB7, CBT, PDF, EPUB and loose images.";
   }
 
-  async function load(files){
+  async function load(files,meta){
     msg.className=""; msg.textContent="Opening…";
     try{
       var src=await openBook(files), f0=files[0];
       if(!src||!src.n) throw new Error("empty");
-      var nm=files.length>1?f0.name+" +"+(files.length-1):f0.name, sz=files.reduce(function(a,f){ return a+f.size; },0);
-      zip=src; names=Array.from({length:src.n},function(_,i){ return i; }); cache={}; dc={}; tcache={}; shown=[]; token++; loaded=true;
+      var nm=files.length>1?f0.name+" +"+(files.length-1):f0.name, sz=meta&&meta.psize!==undefined?meta.psize:files.reduce(function(a,f){ return a+f.size; },0);
+      zip=src; names=Array.from({length:src.n},function(_,i){ return i; }); cache={}; dc={}; tcache={}; arCache={}; shown=[]; token++; loaded=true;
       key=pkey(nm,sz);
-      var pr=getProg(nm,sz), p=pr?pr.p:-1; idx=p>=0&&p<names.length?p:0;
+      var pr=getProg(nm,sz), p=pr?pr.p:-1; idx=p>=0&&p<names.length?p:0; focusP=idx;
       if(idx>0) toast("Resumed at page "+(idx+1));
       $("title").textContent=bname(nm);
       document.title=nm+" – Tenjin";
@@ -719,11 +739,11 @@ dialog a{color:var(--accent)}
       else if(!(S.cover&&s===0)&&s+1<n) e=s+1;
       if(e!==s){
         var a=await dim(s), b=await dim(e); if(my!==token) return;
-        if(wide(a)||wide(b)){ if(back) s=e; else e=s; }
+        if(wide(a)||wide(b)){ if(back) s=e; else if(opt.focus!==undefined&&opt.focus===e) s=e; else e=s; }
       }
     }
     var pages=s===e?[s]:[s,e];
-    idx=s; shown=pages; updateNav();
+    idx=s; shown=pages; focusP=(opt.focus!==undefined&&opt.focus>=s&&opt.focus<=e)?opt.focus:s; updateNav();
     var us=await Promise.all(pages.map(dataUrl)), ds=await Promise.all(pages.map(dim));
     if(my!==token) return;
     $("spread").style.setProperty("--n",pages.length);
@@ -747,33 +767,44 @@ dialog a{color:var(--accent)}
   var pgList=[], pending=false;
   function imgsOf(p){ return p.querySelectorAll("img"); }
   function mk(tag,cls){ var e=document.createElement(tag); if(cls) e.className=cls; return e; }
+  var arCache={}, anchor=null;
+  function holdAnchor(i){ anchor={i:i,t:Date.now()}; }
+  function dropAnchor(){ anchor=null; }
   function buildStrip(){
     strip.innerHTML=""; strip.style.removeProperty("--dar"); pgList=[];
     strip.classList.toggle("two",S.two); strip.classList.toggle("rtl",S.rtl);
+    for(var kk in arCache){ if(arCache[kk][0]<=1.05){ strip.style.setProperty("--dar",arCache[kk][0]); break; } }
     names.forEach(function(n,i){
       var d=mk("div","pg"), im=mk("img");
       d.dataset.i=i; im.alt="Page "+(i+1); im.draggable=false;
       im.onload=function(){ measured(d,im); };
       d.appendChild(im); pgList.push(d);
+      if(arCache[i]) shape(d,arCache[i][0],arCache[i][1]);
       if(S.two&&S.cover&&i===0&&names.length>1){
         var sp=mk("div","pg sp");
         if(S.rtl){ strip.appendChild(d); strip.appendChild(sp); } else{ strip.appendChild(sp); strip.appendChild(d); }
       }else strip.appendChild(d);
     });
   }
-  function measured(d,im){
-    if(d.classList.contains("split")) return;
-    var r=im.naturalWidth/im.naturalHeight, w=r>1.05;
-    d.style.setProperty("--ar",r); d.style.setProperty("--nw",im.naturalWidth+"px");
+  function shape(d,r,nw){
+    var w=r>1.05;
+    d.style.setProperty("--ar",r); d.style.setProperty("--nw",nw+"px");
     if(!w&&!strip.style.getPropertyValue("--dar")) strip.style.setProperty("--dar",r);
     d.classList.toggle("wide",w);
-    if(w&&!S.two&&S.wide==="split"){
-      var h1=mk("div","hf"), h2=mk("div","hf"), im2=mk("img");
-      im2.alt=im.alt; im2.draggable=false; im2.src=im.src;
+    if(w&&!S.two&&S.wide==="split"&&!d.classList.contains("split")){
+      var im=d.querySelector("img"), h1=mk("div","hf"), h2=mk("div","hf"), im2=mk("img");
+      im2.alt=im.alt; im2.draggable=false; if(im.getAttribute("src")) im2.src=im.src;
       d.classList.add("split"); d.classList.toggle("rv",S.rtl);
-      d.style.setProperty("--wr",r/2); d.style.setProperty("--cr",r/4); d.style.setProperty("--nw",(im.naturalWidth/2)+"px");
+      d.style.setProperty("--wr",r/2); d.style.setProperty("--cr",r/4); d.style.setProperty("--nw",(nw/2)+"px");
       d.insertBefore(h1,im); h1.appendChild(im); h2.appendChild(im2); d.appendChild(h2);
     }
+  }
+  function measured(d,im){
+    if(d.classList.contains("split")) return;
+    var r=im.naturalWidth/im.naturalHeight, nw=im.naturalWidth;
+    if(!(r>0)) return;
+    arCache[+d.dataset.i]=[r,nw]; shape(d,r,nw);
+    if(anchor&&Date.now()-anchor.t<3500&&pgList[anchor.i]&&+d.dataset.i<=anchor.i+1) stage.scrollTop=pgList[anchor.i].offsetTop;
   }
   function fill(p,i){
     p.dataset.s="2";
@@ -851,6 +882,7 @@ dialog a{color:var(--accent)}
 
   /* ---------- navigation ---------- */
   function updateNav(){
+    if(S.mode==="scroll") focusP=idx;
     scrub.value=idx+1; pgIn.value=idx+1; setProg();
     thumbs.querySelectorAll(".cur").forEach(function(t){ t.classList.remove("cur"); });
     var cur=S.mode==="page"&&shown.length?shown:[idx];
@@ -862,8 +894,8 @@ dialog a{color:var(--accent)}
   function goTo(i,opt){
     if(!loaded) return;
     i=Math.max(0,Math.min(names.length-1,i));
-    if(S.mode==="scroll"){ var near=i!==idx&&Math.abs(i-idx)<=2&&!reduced(); idx=i; updateNav(); if(pgList[i]) stage.scrollTo({top:pgList[i].offsetTop,behavior:near?"smooth":"auto"}); refresh(); }
-    else show(S.two?align(i):i,opt);
+    if(S.mode==="scroll"){ var near=i!==idx&&Math.abs(i-idx)<=2&&!reduced(); idx=i; focusP=i; updateNav(); if(pgList[i]){ stage.scrollTo({top:pgList[i].offsetTop,behavior:near?"smooth":"auto"}); if(!near) holdAnchor(i); } refresh(); }
+    else show(S.two?align(i):i,Object.assign({focus:i},opt||{}));
   }
   function fwd(){
     if(!loaded) return;
@@ -893,7 +925,7 @@ dialog a{color:var(--accent)}
   document.querySelectorAll("[data-mode]").forEach(function(b){ b.onclick=function(){ setMode(b.dataset.mode); }; });
   $("two").onclick=function(){ setTwo(!S.two); };
   $("thumbBtn").onclick=function(){ setThumbs(!S.thumbs); };
-  $("cover").onchange=function(){ S.cover=this.checked; persist(); if(loaded&&S.two){ if(S.mode==="scroll") buildStrip(); goTo(idx); } };
+  $("cover").onchange=function(){ S.cover=this.checked; persist(); if(loaded&&S.two){ if(S.mode==="scroll") buildStrip(); goTo(focusP); } };
   $("zi").onclick=function(){ setZoom(S.z+.1); };
   $("zo").onclick=function(){ setZoom(S.z-.1); };
   function commitZoom(){ var v=parseFloat(String($("zr").value).replace(/[^0-9.]/g,"")); if(v>0) setZoom(v/100); else apply(); }
@@ -918,6 +950,7 @@ dialog a{color:var(--accent)}
   $("wideSel").onchange=function(){ S.wide=this.value; persist(); if(loaded&&S.mode==="scroll"){ buildStrip(); goTo(idx); } };
   $("tposSel").onchange=function(){ S.tpos=this.value; apply(); persist(); if(loaded) buildThumbs(); };
   $("tpopChk").onchange=function(){ S.tpop=this.checked; persist(); hidePop(); };
+  $("shadowChk").onchange=function(){ S.shadow=this.checked; apply(); persist(); };
   $("resetSet").onclick=function(){
     Object.keys(DEF).forEach(function(k){ S[k]=DEF[k]; });
     apply(); persist();
@@ -966,7 +999,7 @@ dialog a{color:var(--accent)}
     var k=e.key;
     if(k==="?"){ toggleHelp(); return; }
     if(k==="s"&&!help.open){ toggleSettings(); return; }
-    if(help.open||sdlg.open||$("cloud").open) return;
+    if(help.open||sdlg.open||$("cloud").open||$("news").open) return;
     var il=inLib();
     if(k==="l"){ showLib(!il); return; }
     if(k==="Escape"&&il&&loaded){ showLib(false); return; }
@@ -1151,7 +1184,7 @@ dialog a{color:var(--accent)}
     });
     if(!arr.length){
       var e=document.createElement("p"); e.className="lempty";
-      e.textContent=libItems.length?"No comics match your search or filter.":(libSrc==="cloud"||dirHandle||needPerm?"":"Choose a folder to build your library, or connect a Google Drive folder. Covers and your reading progress will appear here.");
+      e.textContent=libItems.length?"No comics match your search or filter.":(libSrc==="cloud"||dirHandle||needPerm?"":"Choose a folder to build your library, or connect an online folder. Covers and your reading progress will appear here.");
       lgrid.appendChild(e);
     }
     $("lcount").textContent=libItems.length?libItems.length+(libItems.length===1?" comic":" comics"):"";
@@ -1171,7 +1204,7 @@ dialog a{color:var(--accent)}
       var bmp=await createImageBitmap(await src.blob(0,true));
       var h=360, w=Math.max(1,Math.round(bmp.width*h/bmp.height)), c=document.createElement("canvas");
       c.width=w; c.height=h; c.getContext("2d").drawImage(bmp,0,0,w,h); if(bmp.close) bmp.close();
-      it.meta={cover:c.toDataURL("image/jpeg",.72),n:src.n,size:f.size,mtime:f.lastModified};
+      it.meta={cover:c.toDataURL("image/jpeg",.72),n:src.n,size:it.cloud?it.size:f.size,mtime:it.cloud?it.mtime:f.lastModified};
       kvSet("m:"+it.path,it.meta);
     }catch(e){ it.meta={bad:true,n:0}; }
     if(g===lcgen&&inLib()) paintCard(it);
@@ -1180,7 +1213,7 @@ dialog a{color:var(--accent)}
     var c=Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; });
     if(!c) return;
     var cv=c.firstChild, st=stat(it);
-    if(it.meta.cover){ var ci=cv.querySelector(".cloudic"); if(ci) ci.remove(); cv.style.backgroundImage="url("+it.meta.cover+")"; cv.classList.remove("pop"); void cv.offsetWidth; cv.classList.add("pop"); } else cv.textContent="No preview";
+    if(it.meta.cover){ var ci=cv.querySelector(".cloudic"); if(ci) ci.remove(); cv.style.backgroundImage="url("+it.meta.cover+")"; cv.classList.remove("pop"); void cv.offsetWidth; cv.classList.add("pop"); } else{ var ic=cv.querySelector(".cloudic"); if(ic) ic.remove(); if(!cv.querySelector(".nopv")){ var np=document.createElement("span"); np.className="nopv"; np.textContent="No preview"; cv.insertBefore(np,cv.firstChild); } }
     c.lastChild.textContent=st.txt; c.querySelector(".bar i").style.width=st.pct+"%"; c.classList.toggle("done",st.k==="finished");
   }
   /* ---------- cloud library (Google Drive) and offline downloads ---------- */
@@ -1204,19 +1237,44 @@ dialog a{color:var(--accent)}
     if(/^gd404/.test(m)) return "Google couldn’t find that folder. Check the link and its sharing settings.";
     if(/^gd400/.test(m)) return "That API key doesn’t look valid.";
     if(/^gd429/.test(m)) return "Google is rate-limiting requests. Try again in a minute.";
+    if(/^gh403|^gh429/.test(m)) return "GitHub’s hourly limit for anonymous requests was reached. Try again later.";
+    if(/^gh404/.test(m)) return "GitHub couldn’t find that folder. Check the link, and that the repository is public.";
+    if(/^http404/.test(m)) return "That link wasn’t found on the server.";
+    if(/^http40[13]/.test(m)) return "The server wouldn’t share that folder. It needs to be a public link.";
+    if(/^http\d/.test(m)) return "The server returned an error ("+m.slice(4)+").";
     if(m==="cancel") return "Download stopped.";
-    return "Couldn’t reach Google Drive. Showing what was saved earlier.";
+    if(m==="badjson") return "That link looks like JSON, but it isn’t a valid manifest.";
+    return "Couldn’t reach that server. If the link opens in your browser but not here, the server may not allow web pages to read it (CORS). Showing what was saved earlier.";
   }
+  function hash(s){ var h=5381; for(var i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36)+s.length.toString(36); }
   function mkCloudItem(o){
-    var it={path:"gd:"+o.id,fid:o.id,name:o.name,rel:o.rel||o.name,size:o.size||0,mtime:o.mtime||0,cloud:true};
+    var it={path:(o.url?"ol:":"gd:")+o.id,fid:o.id,name:o.name,rel:o.rel||o.name,size:o.size||0,mtime:o.mtime||0,url:o.url||"",cloud:true};
     it.getFile=function(){ return cloudFile(it); };
     return it;
+  }
+  var HINTS={
+    proton:"Proton Drive links are end-to-end encrypted, so a web page can’t read them. Download the folder with the Proton Drive app, then use This device → Choose folder.",
+    blocked:"Tenjin can’t browse folders on that service from a web page. Download the folder and use This device → Choose folder, or put your files on GitHub or a web server.",
+    bad:"That doesn’t look like a folder link.",
+    gdrive:"Google Drive folder. A free API key is needed (see the README).",
+    github:"GitHub folder. No key is needed.",
+    web:"Web folder or manifest. The server has to allow cross-site reads (CORS)."
+  };
+  function detect(link){
+    var l=link.trim(); if(!l) return {type:"none"};
+    if(/(^|[\/.])proton\.me/i.test(l)) return {type:"proton"};
+    if(/(drive|docs)\.google\.com/i.test(l)||/^[\w-]{20,}$/.test(l)){ var g=gdId(l); return g?{type:"gdrive",id:g.id,file:g.file}:{type:"bad"}; }
+    var gh=/^https?:\/\/(?:www\.)?github\.com\/([^\/?#]+)\/([^\/?#]+)(?:\/(tree|blob)\/([^\/?#]+)(?:\/([^?#]*))?)?/i.exec(l);
+    if(gh) return {type:"github",owner:gh[1],repo:gh[2].replace(/\.git$/,""),blob:gh[3]==="blob",ref:gh[4]||"",path:(gh[5]||"").replace(/\/+$/,"")};
+    if(/(dropbox\.com|db\.tt|onedrive\.live\.com|1drv\.ms|sharepoint\.com|mega\.nz|mediafire\.com|icloud\.com)/i.test(l)) return {type:"blocked"};
+    if(/^https?:\/\//i.test(l)) return {type:"web",url:l};
+    return {type:"bad"};
   }
   function attachCloudCache(){
     try{ var a=JSON.parse(ls("tenjin:clist")); if(a&&a.length) cloudItems=a.map(mkCloudItem); }catch(e){}
   }
   function cacheCloud(){
-    ls("tenjin:clist",JSON.stringify(cloudItems.map(function(it){ return {id:it.fid,name:it.name,rel:it.rel,size:it.size,mtime:it.mtime}; })));
+    ls("tenjin:clist",JSON.stringify(cloudItems.map(function(it){ return {id:it.fid,name:it.name,rel:it.rel,size:it.size,mtime:it.mtime,url:it.url}; })));
   }
   async function attachMeta(arr){
     for(var i=0;i<arr.length;i++){
@@ -1230,7 +1288,7 @@ dialog a{color:var(--accent)}
     libItems.forEach(function(it){ libMap[it.path]=it; });
     $("lib").dataset.src=name;
     document.querySelectorAll("[data-src]").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.src===name); });
-    $("lname").textContent=name==="cloud"?((cloud&&cloud.name)||"Google Drive"):(dirHandle?dirHandle.name:"Library");
+    $("lname").textContent=name==="cloud"?((cloud&&cloud.name)||"Online library"):(dirHandle?dirHandle.name:"Library");
     lnote("");
     if(name==="device"&&needPerm&&dirHandle) showReconnect();
   }
@@ -1255,25 +1313,86 @@ dialog a{color:var(--accent)}
       if(out.length%25===0&&libSrc==="cloud") lnote("Loading from Google Drive… "+out.length+" found");
     }while(tok);
   }
+  async function ghList(c,out){
+    var base="https://api.github.com/repos/"+c.owner+"/"+c.repo, ref=c.ref;
+    if(!ref){
+      var r0=await fetch(base); if(!r0.ok) throw new Error("gh"+r0.status);
+      ref=(await r0.json()).default_branch||"main"; c.ref=ref;
+    }
+    var r=await fetch(base+"/git/trees/"+encodeURIComponent(ref)+"?recursive=1"); if(!r.ok) throw new Error("gh"+r.status);
+    var j=await r.json(), pre=c.path&&!c.blob?c.path+"/":"";
+    (j.tree||[]).forEach(function(t){
+      if(t.type!=="blob"||!LIBRE.test(t.path)) return;
+      if(c.blob?t.path!==c.path:(pre&&t.path.indexOf(pre)!==0)) return;
+      var rel=c.blob?t.path.split("/").pop():t.path.slice(pre.length);
+      var url="https://raw.githubusercontent.com/"+c.owner+"/"+c.repo+"/"+encodeURIComponent(ref)+"/"+t.path.split("/").map(encodeURIComponent).join("/");
+      out.push(mkCloudItem({id:hash(url),name:rel.split("/").pop(),rel:rel,size:t.size||0,mtime:0,url:url}));
+    });
+    if(j.truncated) lnote("That repository is very large, so GitHub returned a partial list.");
+  }
+  async function walkDir(url,prefix,out,depth,seen,budget,html){
+    if(seen[url]||budget[0]--<=0) return; seen[url]=1;
+    if(html===undefined){ var r=await fetch(url); if(!r.ok) throw new Error("http"+r.status); html=await r.text(); }
+    var doc=new DOMParser().parseFromString(html,"text/html"), base=new URL(url), links=doc.querySelectorAll("a[href]"), dirs=[];
+    for(var i=0;i<links.length;i++){
+      var h=links[i].getAttribute("href"); if(!h||h.charAt(0)==="?"||h.charAt(0)==="#") continue;
+      var u; try{ u=new URL(h,url); }catch(e){ continue; }
+      if(u.origin!==base.origin||u.search||u.pathname.indexOf(base.pathname)!==0) continue;
+      if(u.pathname.slice(-1)==="/"){ if(u.pathname.length>base.pathname.length) dirs.push(u.href); continue; }
+      var nm; try{ nm=decodeURIComponent(u.pathname.split("/").pop()); }catch(e){ nm=u.pathname.split("/").pop(); }
+      if(LIBRE.test(nm)) out.push(mkCloudItem({id:hash(u.href),name:nm,rel:prefix+nm,size:0,mtime:0,url:u.href}));
+    }
+    if(depth<5) for(var k=0;k<dirs.length;k++){
+      var seg=dirs[k].replace(/\/$/,"").split("/").pop(); try{ seg=decodeURIComponent(seg); }catch(e){}
+      await walkDir(dirs[k],prefix+seg+"/",out,depth+1,seen,budget);
+    }
+  }
+  async function webList(c,out){
+    var path=""; try{ path=new URL(c.url).pathname; }catch(e){}
+    if(LIBRE.test(path)){
+      var nm=decodeURIComponent(path.split("/").pop());
+      out.push(mkCloudItem({id:hash(c.url),name:nm,rel:nm,size:0,mtime:0,url:c.url})); return;
+    }
+    var r=await fetch(c.url); if(!r.ok) throw new Error("http"+r.status);
+    var text=await r.text(), ct=r.headers.get("content-type")||"";
+    if(/json/i.test(ct)||/^\s*[\[{]/.test(text)){
+      var j; try{ j=JSON.parse(text); }catch(e){ throw new Error("badjson"); }
+      var arr=Array.isArray(j)?j:(j.items||j.files||j.comics||[]);
+      arr.forEach(function(o){
+        if(!o||!o.url) return;
+        var url=new URL(o.url,c.url).href, rel=String(o.path||o.name||url.split("/").pop()).replace(/^\/+/,""), nm=rel.split("/").pop();
+        if(!LIBRE.test(nm)) return;
+        out.push(mkCloudItem({id:hash(url),name:nm,rel:rel,size:Number(o.size)||0,mtime:Date.parse(o.modified||o.mtime)||0,url:url}));
+      });
+      return;
+    }
+    var fin=(r.url||c.url).split("?")[0].split("#")[0]; if(fin.slice(-1)!=="/") fin+="/";
+    await walkDir(fin,"",out,0,{},[150],text);
+  }
+  async function listOnline(c){
+    var out=[];
+    if(c.type==="github") await ghList(c,out);
+    else if(c.type==="web") await webList(c,out);
+    else if(c.file){
+      var r=await fetch(GD+"/"+c.id+"?fields="+encodeURIComponent("id,name,size,modifiedTime")+"&supportsAllDrives=true&key="+encodeURIComponent(c.key));
+      if(!r.ok) throw new Error("gd"+r.status);
+      var f=await r.json(); if(LIBRE.test(f.name)) out.push(mkCloudItem({id:f.id,name:f.name,size:Number(f.size)||0,mtime:Date.parse(f.modifiedTime)||0}));
+    }else await gdList(c.id,c.key,"",out,0);
+    out.sort(function(a,b){ return a.rel.localeCompare(b.rel,undefined,{numeric:true,sensitivity:"base"}); });
+    return out;
+  }
   async function refreshCloud(){
     if(!cloud) return;
-    lnote("Loading from Google Drive…");
-    var out=[];
-    try{
-      if(cloud.file){
-        var r=await fetch(GD+"/"+cloud.id+"?fields="+encodeURIComponent("id,name,size,modifiedTime")+"&supportsAllDrives=true&key="+encodeURIComponent(cloud.key));
-        if(!r.ok) throw new Error("gd"+r.status);
-        var f=await r.json(); if(LIBRE.test(f.name)) out.push(mkCloudItem({id:f.id,name:f.name,size:Number(f.size)||0,mtime:Date.parse(f.modifiedTime)||0}));
-      }else await gdList(cloud.id,cloud.key,"",out,0);
-    }catch(e){ if(libSrc==="cloud") lnote(gdErr(e)); return; }
-    out.sort(function(a,b){ return a.rel.localeCompare(b.rel,undefined,{numeric:true,sensitivity:"base"}); });
+    lnote("Loading…");
+    var out;
+    try{ out=await listOnline(cloud); }catch(e){ if(libSrc==="cloud") lnote(gdErr(e)); return; }
     await attachMeta(out);
-    cloudItems=out; cacheCloud();
-    if(libSrc==="cloud"){ useSrc("cloud"); lnote(out.length?"":"No comics were found in that Drive folder."); enterNext=true; renderLib(); }
+    cloudItems=out; cacheCloud(); ls("tenjin:cloud",JSON.stringify(cloud));
+    if(libSrc==="cloud"){ useSrc("cloud"); lnote(out.length?"":"No comics were found in that folder."); enterNext=true; renderLib(); }
   }
-  async function gdDownload(it,onp){
-    var r=await fetch(GD+"/"+it.fid+"?alt=media&supportsAllDrives=true&key="+encodeURIComponent(cloud.key));
-    if(!r.ok) throw new Error("gd"+r.status);
+  async function fetchItem(it,onp){
+    var r=await fetch(it.url||(GD+"/"+it.fid+"?alt=media&supportsAllDrives=true&key="+encodeURIComponent(cloud.key)));
+    if(!r.ok) throw new Error((it.url?"http":"gd")+r.status);
     var total=Number(r.headers.get("content-length"))||it.size||0;
     if(r.body&&r.body.getReader){
       var rd=r.body.getReader(), chunks=[], got=0;
@@ -1292,7 +1411,7 @@ dialog a{color:var(--accent)}
       if(rec&&rec.blob) return new File([rec.blob],it.name,{lastModified:it.mtime});
       delete offSet[it.fid]; saveOff();
     }
-    var blob=await gdDownload(it,onp);
+    var blob=await fetchItem(it,onp);
     return new File([blob],it.name,{lastModified:it.mtime});
   }
   function cardOf(it){ return Array.prototype.find.call(lgrid.children,function(x){ return x.dataset&&x.dataset.p===it.path; }); }
@@ -1318,13 +1437,13 @@ dialog a{color:var(--accent)}
     it.dl=true; setRing(it,0);
     try{
       if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
-      var blob=await gdDownload(it,function(p){ setRing(it,p); if(cb) cb(p); });
+      var blob=await fetchItem(it,function(p){ setRing(it,p); if(cb) cb(p); });
       await kv("readwrite",function(st){ return st.put({blob:blob,name:it.name,size:blob.size},"f:"+it.fid); });
       offSet[it.fid]=1; saveOff(); it.dl=false; setRing(it,1,true);
       if(!it.meta){ cq.push(it); cpump(); }
     }catch(e){
       it.dl=false; clearRing(it);
-      if(!dlRunning&&e.message!=="cancel") toast(/^gd/.test(e.message)?gdErr(e):"Couldn’t save the download. Is your storage full?");
+      if(!dlRunning&&e.message!=="cancel") toast(/^(gd|http|gh)/.test(e.message)?gdErr(e):"Couldn’t save the download. Is your storage full?");
       throw e;
     }
   }
@@ -1378,34 +1497,50 @@ dialog a{color:var(--accent)}
     toast("Opening…");
     try{
       var lp=-1, f=it.cloud?await cloudFile(it,function(p){ var q=Math.round(p*10); if(q!==lp&&!offSet[it.fid]){ lp=q; toast("Downloading… "+Math.round(p*100)+"%"); } }):await it.getFile();
-      if(await load([f])) showLib(false); else toast("Couldn’t open that comic");
+      if(await load([f],it.cloud?{psize:it.size}:null)) showLib(false); else toast("Couldn’t open that comic");
     }catch(e){ toast(it.cloud?gdErr(e):"Couldn’t open that comic"); }
+  }
+  function updateHint(){
+    var t=detect($("cLink").value);
+    $("keyRow").hidden=t.type!=="gdrive";
+    $("cHint").textContent=t.type==="none"?"":(HINTS[t.type]||"");
   }
   function openCloudDlg(){
     $("cLink").value=cloud&&cloud.url||""; $("cKey").value=cloud&&cloud.key||""; $("cMsg").textContent="";
-    $("cForget").hidden=!cloud;
+    $("cForget").hidden=!cloud; updateHint();
     var d=$("cloud"); if(d.showModal&&!d.open) d.showModal();
   }
+  $("cLink").oninput=updateHint;
   $("cSave").onclick=async function(){
-    var link=$("cLink").value.trim(), key=$("cKey").value.trim(), m=$("cMsg");
-    if(/proton\.me/i.test(link)){ m.textContent="Proton Drive links are end-to-end encrypted, so a web page can’t read them. Download the folder from Proton Drive, then use This device → Choose folder."; return; }
-    var g=gdId(link); if(!g){ m.textContent="That doesn’t look like a Google Drive link."; return; }
-    if(!key){ m.textContent="Add a Google API key. The README explains how to get one for free."; return; }
+    var link=$("cLink").value.trim(), key=$("cKey").value.trim(), m=$("cMsg"), t=detect(link), c;
+    if(t.type==="none"){ m.textContent="Paste a folder link first."; return; }
+    if(HINTS[t.type]&&(t.type==="proton"||t.type==="blocked"||t.type==="bad")){ m.textContent=HINTS[t.type]; return; }
     m.textContent="Connecting…";
     try{
-      var r=await fetch(GD+"/"+g.id+"?fields=name&supportsAllDrives=true&key="+encodeURIComponent(key));
-      if(!r.ok) throw new Error("gd"+r.status);
-      var j=await r.json();
-      cloud={id:g.id,file:g.file,key:key,url:link,name:j.name||"Google Drive"};
+      if(t.type==="gdrive"){
+        if(!key){ m.textContent="Add a Google API key. The README explains how to get one for free."; return; }
+        var r=await fetch(GD+"/"+t.id+"?fields=name&supportsAllDrives=true&key="+encodeURIComponent(key));
+        if(!r.ok) throw new Error("gd"+r.status);
+        c={type:"gdrive",id:t.id,file:t.file,key:key,url:link,name:(await r.json()).name||"Google Drive"};
+      }else if(t.type==="github"){
+        c={type:"github",owner:t.owner,repo:t.repo,ref:t.ref,path:t.path,blob:t.blob,url:link,name:t.owner+"/"+t.repo+(t.path?"/"+t.path:"")};
+      }else{
+        var host=""; try{ host=new URL(t.url).hostname; }catch(e){}
+        c={type:"web",url:link,name:host||"Online library"};
+      }
+      var items=await listOnline(c);
+      if(!items.length){ m.textContent="Connected, but no comics were found in that folder."; return; }
+      await attachMeta(items);
+      cloud=c; ls("tenjin:cloud",JSON.stringify(cloud)); ls("tenjin:clist","");
+      cloudItems=items; cacheCloud();
     }catch(e){ m.textContent=gdErr(e); return; }
-    ls("tenjin:cloud",JSON.stringify(cloud)); ls("tenjin:clist","");
-    cloudItems=[]; closeDlg($("cloud")); useSrc("cloud"); enterNext=true; renderLib(); refreshCloud();
+    closeDlg($("cloud")); useSrc("cloud"); enterNext=true; renderLib();
   };
   $("cCancel").onclick=function(){ closeDlg($("cloud")); };
   $("cForget").onclick=async function(){
     var ids=Object.keys(offSet); for(var i=0;i<ids.length;i++) await kvDel("f:"+ids[i]);
     offSet={}; saveOff(); cloud=null; ls("tenjin:cloud",""); ls("tenjin:clist",""); cloudItems=[];
-    closeDlg($("cloud")); useSrc("device"); enterNext=true; renderLib(); toast("Google Drive link removed");
+    closeDlg($("cloud")); useSrc("device"); enterNext=true; renderLib(); toast("Online link removed");
   };
   document.querySelectorAll("[data-src]").forEach(function(b){ b.onclick=function(){ setSrc(b.dataset.src); }; });
   $("clink").onclick=openCloudDlg;
@@ -1527,6 +1662,15 @@ dialog a{color:var(--accent)}
   $("lsort").onchange=function(){ S.lsort=this.value; persist(); renderLib(); };
   document.querySelectorAll("[data-lf]").forEach(function(b){ b.onclick=function(){ S.lfilter=b.dataset.lf; persist(); renderLib(); }; });
 
+  ["wheel","touchstart","pointerdown"].forEach(function(ev){ stage.addEventListener(ev,dropAnchor,{passive:true}); });
+  document.addEventListener("keydown",dropAnchor,true);
+
+  var VERSION="1.1.0";
+  function showNews(){ var d=$("news"); if(d.showModal&&!d.open) d.showModal(); }
+  $("newsClose").onclick=function(){ closeDlg($("news")); };
+  $("newsBtn").onclick=function(e){ e.preventDefault(); closeDlg(sdlg); setTimeout(showNews,220); };
+  try{ if(ls("tenjin:ver")!==VERSION){ var returning=!!ls("cbz:settings"); ls("tenjin:ver",VERSION); if(returning) setTimeout(showNews,1200); } }catch(e){}
+
   /* ---------- motion helpers ---------- */
   function moveSegs(){
     document.querySelectorAll(".seg").forEach(function(sg){
@@ -1543,7 +1687,7 @@ dialog a{color:var(--accent)}
     d.classList.add("out");
     setTimeout(function(){ d.classList.remove("out"); d.close(); },reduced()?0:170);
   }
-  [$("help"),$("settings"),$("cloud")].forEach(function(d){
+  [$("help"),$("settings"),$("cloud"),$("news")].forEach(function(d){
     d.addEventListener("cancel",function(e){ e.preventDefault(); closeDlg(d); });
     d.addEventListener("click",function(e){
       var r=d.getBoundingClientRect();

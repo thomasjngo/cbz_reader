@@ -4,6 +4,8 @@ A fast, private reader for comics and books that runs entirely in your browser. 
 
 Tenjin (天神) is named after the Japanese deity of learning and scholarship.
 
+**Version 1.1.0** · [Patch notes](CHANGELOG.md)
+
 **Live version:** https://thomasjngo.github.io/tenjin/
 
 ## Supported formats
@@ -30,6 +32,7 @@ Files are detected by their contents as well as their extension, so a mislabelle
 - **Fit modes:** Width, Fit (the whole page), and Actual size.
 - **Zoom** from 25% to 400%. Type a percentage in the toolbar field and press Enter, use **+** and **−** (10% steps), or use `Ctrl` + mouse wheel (zooms toward the cursor) or a trackpad pinch. Double-click the field to reset. Drag a zoomed page to move around it.
 - **Snap to center.** If you scroll too far left or right while zoomed in, a **Center** button appears at the bottom of the page. Click it, or press `c`, to glide back to center.
+- **Your page is kept** when you switch between one-page and two-page mode, or between Page and Scroll mode.
 - **Smart scrolling:** `Space` scrolls down and turns the page when you reach the bottom. `Shift+Space` does the reverse.
 - **Page previews** can sit at the **bottom, top, left or right** (Settings). Click a thumbnail to jump there. The current page, or both pages of a spread, is highlighted. Hover over a thumbnail to see an enlarged preview (can be turned off).
 - **Page slider and jump box:** drag the slider, or type a page number (press `g`).
@@ -40,21 +43,40 @@ Files are detected by their contents as well as their extension, so a mislabelle
 - Drag and drop a file anywhere on the page to open it.
 
 ### Library
-- Click **Library** (or press `l`) and choose **This device** or **Google Drive**.
+- Click **Library** (or press `l`) and choose **This device** or **Online**.
 - **This device:** choose a folder and Tenjin scans it and all subfolders for CBZ, CBR, CB7, CBT, PDF and EPUB files. In Chrome and Edge the folder is remembered; next visit you may be asked to click **Reconnect** once to re-grant access.
 - Each comic gets a **cover preview**. Covers are generated as you scroll and saved so they only need to be made once.
 - **Reading progress** is tracked for every comic: a progress bar with "Page 12 of 40", "Not started", or "Finished". Finished comics have a slightly greyed-out cover.
 - **Resume where you left off:** opening a comic jumps back to the page you were on. **Continue reading** opens whatever you read most recently.
 - **Search**, **filter** (All, Reading, Unread, Finished) and **sort** (Name, Recently read, Newest file).
-- **Right-click a comic** (or long-press on touch, or `Shift+F10` / the Menu key) for **Open**, **Mark as read**, **Mark as unread** and **Regenerate cover**. Cloud comics also get **Download for offline**, **Remove download** and **Save to device…**.
+- **Right-click a comic** (or long-press on touch, or `Shift+F10` / the Menu key) for **Open**, **Mark as read**, **Mark as unread** and **Regenerate cover**. Online comics also get **Download for offline**, **Remove download** and **Save to device…**.
 
-### Google Drive library
-1. In the library, choose **Google Drive**, click **Link…** and paste a folder link that is shared as **Anyone with the link**.
-2. Paste a free Google API key (setup below). Tenjin lists every comic in the folder and its subfolders.
-3. **Your link and key are remembered** in this browser, so next time you open Tenjin your Drive library is right there.
+### Online libraries
+In the library, choose **Online**, click **Link…** and paste a public folder link. Tenjin works out what kind of link it is, reads the folder structure (including subfolders), and lists every comic with covers and reading progress. **Your link is remembered**, so next time you open Tenjin the library is right there, and the last list stays visible offline.
+
+| Link | What you need | Notes |
+| --- | --- | --- |
+| **Google Drive folder** shared as "Anyone with the link" | A free Google API key | Subfolders are included. Setup is below. |
+| **GitHub folder or repository**, such as `github.com/owner/repo` or `.../tree/main/Comics` | Nothing | Public repositories only. The folder listing uses GitHub's anonymous API, which has an hourly limit. Very large files and Git LFS files may not download. |
+| **Web folder** (a page that lists files, as served by Apache, nginx or `python -m http.server`) | The server must allow cross-site reads (CORS) | Follows subfolders up to five levels deep. |
+| **Manifest** (a JSON file listing your links) | The server must allow CORS | Works with any host and any folder structure. Format below. |
+| A direct link to one `.cbz`, `.pdf`, `.epub` and so on | CORS | Adds a single comic. |
+
+**Manifest format.** `path` becomes the folder structure, `url` can be relative to the manifest, and `size` is optional:
+
+```json
+{
+  "items": [
+    { "path": "Series A/Vol 1.cbz", "url": "https://example.com/files/a1.cbz", "size": 52428800 },
+    { "path": "Series A/Vol 2.cbz", "url": "a2.cbz" }
+  ]
+}
+```
+
+**About CORS.** A browser only lets a web page read another site if that site allows it. GitHub and GitHub Pages do, and storage buckets can be configured to. Many file hosts do not. If a link opens in a browser tab but Tenjin can't read it, this is why.
 
 **Downloading:**
-- Click the download button on a cover, or use the right-click menu, to download a single book for offline reading. A ring fills around the button while it downloads and turns into a check mark when it is saved.
+- Click the download button on a cover, or use the right-click menu, to download one book for offline reading. A ring fills around the button and turns into a check mark when it is saved.
 - **Download all** saves the whole folder one book at a time, with an animated progress bar and a Cancel button.
 - **Save to folder…** (Chrome and Edge) writes real files, keeping your subfolders, into a folder on your computer.
 - Downloaded books open instantly and work without an internet connection.
@@ -66,7 +88,7 @@ Files are detected by their contents as well as their extension, so a mislabelle
 4. Recommended: edit the key and, under **Application restrictions**, choose **Websites** and add `https://thomasjngo.github.io/*`. Under **API restrictions**, allow only the Google Drive API.
 5. In Google Drive, share your folder as **Anyone with the link**, then paste the folder link and the key into Tenjin.
 
-**Not supported:** Proton Drive. Its shared links are end-to-end encrypted and have no web-accessible API, so a web page can't read them. Download the folder from Proton Drive and use **This device → Choose folder** instead.
+**What can't be read from a web page:** Proton Drive links are end-to-end encrypted, so only Proton's own app can decrypt them. Dropbox, OneDrive and SharePoint, Mega, MediaFire and iCloud links don't offer a folder listing that a web page can read. For these, download the folder with their app and use **This device → Choose folder**, or put your files on GitHub or a web server you control.
 
 ### Settings
 Open **Settings** with the gear button or `s`:
@@ -74,6 +96,7 @@ Open **Settings** with the gear button or `s`:
 - **Wide pages in Scroll mode:** split into two pages, or keep whole.
 - **Page previews:** bottom, top, left or right.
 - **Enlarge previews when you hover over them**, on or off.
+- **Soft shadow** around and between pages, on or off.
 - **Page number** in the bottom-right corner, on or off.
 - **First page alone** in two-page mode, on or off.
 - **Reset all settings** to the defaults.
@@ -107,11 +130,11 @@ Your view choices are **remembered automatically** and applied every time you op
 
 Everything is stored in your browser on your device.
 
-- **Settings, reading progress, your Drive link and key** are kept in the browser's local storage. Progress is matched by file name and size, so renaming or editing a file resets its progress.
+- **Settings, reading progress, your online link and any Google API key** are kept in the browser's local storage. Progress is matched by file name and size, so renaming or editing a file resets its progress.
 - **Covers, the remembered folder and downloaded books** are kept in the browser's IndexedDB. Downloads count against your browser's storage quota.
 - Data is **per browser and per device** and does not sync. Clearing your browser's site data removes it.
 - Because browser storage is shared across everything on `thomasjngo.github.io`, settings and progress from the old `cbz_reader` address carry over to Tenjin automatically.
-- The only network requests Tenjin makes are the ones you ask for: Google Drive (if you connect it), the PDF engine (when you open a PDF) and the Inter font.
+- The only network requests Tenjin makes are the ones you ask for: your online library (if you connect one), the PDF engine (when you open a PDF) and the Inter font.
 
 ## Browser support
 
@@ -122,7 +145,7 @@ Everything is stored in your browser on your device.
 
 Keep these files together in the same folder: `index.html` and `jszip.min.js`. To add CBR and CB7 support, also add the `libarchive/` folder (three files: `libarchive.js`, `worker-bundle.js` and `libarchive.wasm`).
 
-**In a browser:** serve the folder (`npx serve .`) and open it. Opening `index.html` straight from disk works for CBZ, but CBR/CB7 and Google Drive need a web server.
+**In a browser:** serve the folder (`npx serve .`) and open it. Opening `index.html` straight from disk works for CBZ, but CBR/CB7 and online libraries need a web server.
 
 **On GitHub Pages:**
 1. Name the repository `tenjin`, push it to GitHub and make it public.
@@ -141,7 +164,7 @@ Use `npm run dist` to build an installer for your operating system.
 ## Limits worth knowing
 
 - Opening a file loads all of it into memory. Very large files (hundreds of MB) can be slow, and generating covers for a folder of them takes time. Covers are made one at a time.
-- Cloud comics get a cover only after you download them, because a cover needs the file itself.
+- Online comics get a cover only after you download them, because a cover needs the file itself.
 - PDFs are drawn page by page as images, so text is not selectable.
 - RAR and 7-Zip support is an optional add-on built on libarchive.js. Password-protected archives are not supported.
 - In Scroll mode, pages load as you approach them and unload when far away. Spreads are detected as they load, so the scrollbar can shift slightly while page sizes are still being measured.
