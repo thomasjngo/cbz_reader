@@ -1,6 +1,6 @@
 # Tenjin
 
-A fast, private reader for comics and books that runs entirely in your browser. Nothing is uploaded anywhere: your files, covers and reading progress stay on your device.
+A fast, private reader for manga, comics, and books that runs entirely in your browser. Nothing is uploaded anywhere: your files, covers and reading progress stay on your device.
 
 Tenjin (天神) is named after the Japanese deity of learning and scholarship.
 
