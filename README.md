@@ -55,7 +55,6 @@ In the library, choose **Online**, click **Link…** and paste a public folder l
 | Link | What you need | Notes |
 | --- | --- | --- |
 | **Google Drive folder** shared as "Anyone with the link" | A free Google API key | Subfolders are included. Setup is below. |
-| **GitHub folder or repository**, such as `github.com/owner/repo` or `.../tree/main/Comics` | Nothing | Public repositories only. The folder listing uses GitHub's anonymous API, which has an hourly limit. Very large files and Git LFS files may not download. |
 | **Web folder** (a page that lists files, as served by Apache, nginx or `python -m http.server`) | The server must allow cross-site reads (CORS) | Follows subfolders up to five levels deep. |
 | **Manifest** (a JSON file listing your links) | The server must allow CORS | Works with any host and any folder structure. Format below. |
 | A direct link to one `.cbz`, `.pdf`, `.epub` and so on | CORS | Adds a single comic. |
